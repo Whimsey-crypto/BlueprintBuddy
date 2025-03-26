@@ -205,6 +205,14 @@
         .calculate-btn:hover, .route-btn:hover {
             background-color: rgba(41, 128, 185, 1);
         }
+        /* Category labels */
+        .category-label {
+            color: #ffcc00;
+            font-weight: bold;
+            margin-top: 10px;
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -261,22 +269,40 @@
             <h3>Inventory</h3>
             <div id="status-message" class="status-indicator">Waiting for game data...</div>
             <button id="refresh-inventory">Refresh Inventory</button>
+            <div id="inventory-display" class="ingredients-list" style="margin-top: 10px;"></div>
         </div>
         
         <!-- Settings Tab -->
         <div id="settings-tab" class="tab-content">
             <h3>Settings</h3>
-            <div style="color: white;">
-                Settings will be implemented in future versions.
+            <div style="color: white; margin-bottom: 10px;">
+                Configure BlueprintBuddy options.
             </div>
+            
+            <div class="quantity-selector">
+                <label for="trailer-capacity" style="color: white; flex: 1;">Trailer Capacity (kg):</label>
+                <input type="number" id="trailer-capacity" min="100" max="10000" value="300" style="width: 70px;">
+            </div>
+            
+            <div class="quantity-selector">
+                <label style="color: white; flex: 1;">Include Inventory:</label>
+                <input type="checkbox" id="include-inventory" checked style="width: auto;">
+            </div>
+            
+            <div class="quantity-selector">
+                <label style="color: white; flex: 1;">Auto-refresh Data:</label>
+                <input type="checkbox" id="auto-refresh" checked style="width: auto;">
+            </div>
+            
+            <button id="reset-settings">Reset to Defaults</button>
         </div>
         
         <div class="resize-handle" id="resizeHandle"></div>
     </div>
 
-    <!-- Load the recipe data first -->
-    <script src="recipes.ejs"></script>
-    <script src="items.ejs"></script>
+    <!-- Load the EJS data files -->
+    <script src="items.ejs" type="text/javascript"></script>
+    <script src="recipes.ejs" type="text/javascript"></script>
     
     <!-- Main App Script -->
     <script>
@@ -286,7 +312,14 @@
                 // Basic state
                 this.state = {
                     inventory: {},
-                    selectedRecipe: ""
+                    selectedRecipe: "",
+                    itemsData: null,
+                    recipesData: null,
+                    settings: {
+                        trailerCapacity: 300, // kg
+                        includeInventory: true,
+                        autoRefresh: true
+                    }
                 };
                 
                 // References to DOM elements
@@ -294,6 +327,9 @@
                 
                 // Game connection setup
                 this.isGameConnected = false;
+                
+                // Refresh timer
+                this.refreshTimer = null;
             }
             
             // Initialize the app
@@ -312,8 +348,11 @@
                 // Set up game connection
                 this.setupGameConnection();
                 
-                // Load recipes from external file
-                this.loadRecipes();
+                // Load data from EJS files
+                this.loadData();
+                
+                // Load settings
+                this.loadSettings();
                 
                 // Center menu initially
                 const menuContainer = this.elements.menuContainer;
@@ -348,7 +387,14 @@
                     
                     // Inventory elements
                     refreshInventoryBtn: document.getElementById('refresh-inventory'),
-                    statusMessage: document.getElementById('status-message')
+                    statusMessage: document.getElementById('status-message'),
+                    inventoryDisplay: document.getElementById('inventory-display'),
+                    
+                    // Settings elements
+                    trailerCapacity: document.getElementById('trailer-capacity'),
+                    includeInventory: document.getElementById('include-inventory'),
+                    autoRefresh: document.getElementById('auto-refresh'),
+                    resetSettings: document.getElementById('reset-settings')
                 };
             }
             
@@ -387,6 +433,28 @@
                 // Refresh inventory button
                 elements.refreshInventoryBtn.addEventListener('click', () => {
                     this.getInventoryData();
+                });
+                
+                // Settings change handlers
+                elements.trailerCapacity.addEventListener('change', () => {
+                    this.state.settings.trailerCapacity = parseInt(elements.trailerCapacity.value) || 300;
+                    this.saveSettings();
+                });
+                
+                elements.includeInventory.addEventListener('change', () => {
+                    this.state.settings.includeInventory = elements.includeInventory.checked;
+                    this.saveSettings();
+                });
+                
+                elements.autoRefresh.addEventListener('change', () => {
+                    this.state.settings.autoRefresh = elements.autoRefresh.checked;
+                    this.saveSettings();
+                    this.setupAutoRefresh();
+                });
+                
+                // Reset settings button
+                elements.resetSettings.addEventListener('click', () => {
+                    this.resetSettings();
                 });
                 
                 // ESC key handler
@@ -469,7 +537,8 @@
                 // Listen for messages from game client
                 window.addEventListener('message', (event) => {
                     try {
-                        const data = JSON.parse(event.data);
+                        // Check if event.data is already an object or needs to be parsed
+                        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
                         this.processGameData(data);
                     } catch (error) {
                         console.error('Failed to process game data:', error);
@@ -478,6 +547,73 @@
                 
                 // Request initial inventory data
                 this.getInventoryData();
+            }
+            
+            // Load settings from localStorage
+            loadSettings() {
+                try {
+                    const savedSettings = localStorage.getItem('blueprintBuddySettings');
+                    if (savedSettings) {
+                        this.state.settings = JSON.parse(savedSettings);
+                    }
+                    
+                    // Update DOM elements with loaded settings
+                    this.elements.trailerCapacity.value = this.state.settings.trailerCapacity;
+                    this.elements.includeInventory.checked = this.state.settings.includeInventory;
+                    this.elements.autoRefresh.checked = this.state.settings.autoRefresh;
+                    
+                    // Setup auto-refresh if enabled
+                    this.setupAutoRefresh();
+                } catch (error) {
+                    console.error('Failed to load settings:', error);
+                }
+            }
+            
+            // Save settings to localStorage
+            saveSettings() {
+                try {
+                    localStorage.setItem('blueprintBuddySettings', JSON.stringify(this.state.settings));
+                } catch (error) {
+                    console.error('Failed to save settings:', error);
+                }
+            }
+            
+            // Reset settings to defaults
+            resetSettings() {
+                this.state.settings = {
+                    trailerCapacity: 300,
+                    includeInventory: true,
+                    autoRefresh: true
+                };
+                
+                // Update DOM elements
+                this.elements.trailerCapacity.value = this.state.settings.trailerCapacity;
+                this.elements.includeInventory.checked = this.state.settings.includeInventory;
+                this.elements.autoRefresh.checked = this.state.settings.autoRefresh;
+                
+                // Save to localStorage
+                this.saveSettings();
+                
+                // Setup auto-refresh
+                this.setupAutoRefresh();
+                
+                this.updateStatusMessage('Settings reset to defaults', 'success');
+            }
+            
+            // Set up auto-refresh timer
+            setupAutoRefresh() {
+                // Clear existing timer
+                if (this.refreshTimer) {
+                    clearInterval(this.refreshTimer);
+                    this.refreshTimer = null;
+                }
+                
+                // Set up new timer if enabled
+                if (this.state.settings.autoRefresh) {
+                    this.refreshTimer = setInterval(() => {
+                        this.getInventoryData();
+                    }, 30000); // Refresh every 30 seconds
+                }
             }
             
             // Send commands to the game client
@@ -498,8 +634,14 @@
                 // Handle inventory data
                 if (data.inventory) {
                     try {
-                        this.state.inventory = JSON.parse(data.inventory);
+                        // Check if inventory is already an object or needs to be parsed
+                        this.state.inventory = typeof data.inventory === 'string' 
+                            ? JSON.parse(data.inventory) 
+                            : data.inventory;
                         this.updateStatusMessage('Inventory data received');
+                        
+                        // Update inventory display
+                        this.displayInventory();
                         
                         // If recipe is selected, update its display with new inventory data
                         if (this.state.selectedRecipe) {
@@ -519,6 +661,70 @@
                     type: 'getNamedData', 
                     keys: ['inventory'] 
                 });
+            }
+            
+            // Display inventory items
+            displayInventory() {
+                const inventoryDisplay = this.elements.inventoryDisplay;
+                inventoryDisplay.innerHTML = '';
+                
+                // Check if inventory is empty
+                if (!this.state.inventory || Object.keys(this.state.inventory).length === 0) {
+                    inventoryDisplay.innerHTML = '<div class="ingredient">No items in inventory</div>';
+                    return;
+                }
+                
+                // Group items by category
+                const categories = {};
+                
+                for (const [itemId, amount] of Object.entries(this.state.inventory)) {
+                    if (amount <= 0) continue;
+                    
+                    // Find item data
+                    let itemName = itemId;
+                    let category = 'Unknown';
+                    
+                    if (this.state.itemsData) {
+                        const itemData = this.state.itemsData.find(item => item.id === itemId);
+                        if (itemData) {
+                            itemName = itemData.name || itemId;
+                            category = itemData.category || 'Unknown';
+                        }
+                    } else if (window.ttItems && window.ttItems.allItems) {
+                        const itemData = window.ttItems.allItems.find(item => item.id === itemId);
+                        if (itemData) {
+                            itemName = itemData.name || itemId;
+                            category = itemData.category || 'Unknown';
+                        }
+                    }
+                    
+                    // Add to category
+                    if (!categories[category]) {
+                        categories[category] = [];
+                    }
+                    
+                    categories[category].push({ id: itemId, name: itemName, amount });
+                }
+                
+                // Display items by category
+                for (const [category, items] of Object.entries(categories)) {
+                    // Add category header
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'category-label';
+                    categoryDiv.textContent = category;
+                    inventoryDisplay.appendChild(categoryDiv);
+                    
+                    // Add items
+                    items.forEach(item => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'ingredient have';
+                        itemDiv.innerHTML = `
+                            <span class="ingredient-name">${item.name}</span>
+                            <span class="ingredient-amount">${item.amount}</span>
+                        `;
+                        inventoryDisplay.appendChild(itemDiv);
+                    });
+                }
             }
             
             // Update status message
@@ -544,24 +750,79 @@
                 }
             }
             
-            // Load recipes from external file
-            async loadRecipes() {
+            // Load recipe and item data
+            async loadData() {
                 try {
-                    // Check if recipes are available from the external script
-                    if (typeof window.RECIPES_DATA === 'undefined') {
-                        throw new Error('Recipes data not found');
-                    }
+                    await Promise.all([
+                        this.loadItemsData(),
+                        this.loadRecipesData()
+                    ]);
                     
-                    // Populate recipe select dropdown
-                    this.populateRecipeSelect(window.RECIPES_DATA);
+                    this.populateRecipeSelect();
+                    this.updateStatusMessage('Data loaded successfully', 'success');
                 } catch (error) {
-                    console.error('Failed to load recipes:', error);
-                    this.updateStatusMessage('Failed to load recipes. Check console for details.', 'error');
+                    console.error('Failed to load data:', error);
+                    this.updateStatusMessage('Failed to load data. Check console for details.', 'error');
                 }
             }
             
+            // Load items data
+            async loadItemsData() {
+                // Try to get data from EJS-generated global
+                if (window.ttItems && window.ttItems.allItems) {
+                    this.state.itemsData = window.ttItems.allItems;
+                    return;
+                }
+                
+                // Fallback to ITEMS_DATA
+                if (typeof window.ITEMS_DATA !== 'undefined') {
+                    this.state.itemsData = window.ITEMS_DATA;
+                    return;
+                }
+                
+                this.updateStatusMessage('Items data not found. Using minimal item info.', 'warning');
+                
+                // Create minimal items data
+                this.state.itemsData = [
+                    { id: "sand", name: "Sand", weight: 0.8 },
+                    { id: "gravel", name: "Gravel", weight: 1.2 },
+                    { id: "clay", name: "Clay", weight: 0.9 },
+                    { id: "log", name: "Log", weight: 3.0 }
+                ];
+            }
+            
+            // Load recipes data
+            async loadRecipesData() {
+                // Try to get data from EJS-generated global
+                if (window.ttRecipes && window.ttRecipes.recipes) {
+                    this.state.recipesData = window.ttRecipes.recipes;
+                    return;
+                }
+                
+                // Fallback to RECIPES_DATA
+                if (typeof window.RECIPES_DATA !== 'undefined') {
+                    this.state.recipesData = window.RECIPES_DATA;
+                    return;
+                }
+                
+                this.updateStatusMessage('Recipes data not found. Using minimal recipe info.', 'warning');
+                
+                // Create minimal recipes data
+                this.state.recipesData = {
+                    "Concrete": {
+                        location: "Construction Site",
+                        pays: 150,
+                        ingredients: [
+                            ["sand", 2],
+                            ["gravel", 1]
+                        ],
+                        instructions: "Mix sand and gravel at the Construction Site mixer."
+                    }
+                };
+            }
+            
             // Populate recipe select dropdown
-            populateRecipeSelect(recipesData) {
+            populateRecipeSelect() {
                 const recipeSelect = this.elements.recipeSelect;
                 recipeSelect.innerHTML = '';
                 
@@ -570,6 +831,14 @@
                 defaultOption.value = '';
                 defaultOption.text = '-- Select a Recipe --';
                 recipeSelect.appendChild(defaultOption);
+                
+                // Determine which recipes data to use
+                const recipesData = this.state.recipesData;
+                
+                if (!recipesData || Object.keys(recipesData).length === 0) {
+                    this.updateStatusMessage('No recipe data available', 'error');
+                    return;
+                }
                 
                 // Add recipe options
                 Object.keys(recipesData).sort().forEach(recipeName => {
@@ -588,7 +857,7 @@
                     return;
                 }
                 
-                const recipe = window.RECIPES_DATA[this.state.selectedRecipe];
+                const recipe = this.state.recipesData[this.state.selectedRecipe];
                 if (!recipe) {
                     this.clearRecipeDisplay();
                     return;
@@ -596,7 +865,7 @@
                 
                 // Update recipe metadata
                 this.elements.recipeLocation.textContent = `Location: ${recipe.location || 'Unknown'}`;
-                this.elements.recipeCost.textContent = `Pays: ${(recipe.pays || 0).toLocaleString()}`;
+                this.elements.recipeCost.textContent = `Pays: $${(recipe.pays || 0).toLocaleString()}`;
                 this.elements.recipeInstructions.textContent = recipe.instructions || 'No instructions available.';
                 
                 // Clear ingredients display
@@ -605,7 +874,18 @@
                 // Show each ingredient
                 recipe.ingredients.forEach(([itemId, amount]) => {
                     const userHas = this.state.inventory[itemId] || 0;
-                    const itemData = window.ITEMS_DATA[itemId] || { displayName: itemId };
+                    
+                    // Find item data
+                    let itemName = itemId;
+                    let itemWeight = 0;
+                    
+                    if (this.state.itemsData) {
+                        const itemData = this.state.itemsData.find(item => item.id === itemId);
+                        if (itemData) {
+                            itemName = itemData.name || itemId;
+                            itemWeight = itemData.weight || 0;
+                        }
+                    }
                     
                     // Create ingredient element
                     const ingredientDiv = document.createElement('div');
@@ -622,7 +902,7 @@
                     
                     // Show ingredient info
                     ingredientDiv.innerHTML = `
-                        <span class="ingredient-name">${itemData.displayName || itemId}</span>
+                        <span class="ingredient-name">${itemName}</span>
                         <span class="ingredient-amount">${amount}</span>
                         <span class="inventory-have">${userHas}</span>
                     `;
@@ -654,7 +934,7 @@
                     return;
                 }
                 
-                const recipe = window.RECIPES_DATA[this.state.selectedRecipe];
+                const recipe = this.state.recipesData[this.state.selectedRecipe];
                 if (!recipe) return;
                 
                 const quantity = parseInt(this.elements.recipeQuantity.value) || 1;
@@ -670,16 +950,27 @@
                 let missingItems = [];
                 
                 recipe.ingredients.forEach(([itemId, amount]) => {
-                    const itemData = window.ITEMS_DATA[itemId] || { weight: 0, displayName: itemId };
-                    recipeWeight += (itemData.weight || 0) * amount / 100; // kg
+                    // Find item data
+                    let itemName = itemId;
+                    let itemWeight = 0;
+                    
+                    if (this.state.itemsData) {
+                        const itemData = this.state.itemsData.find(item => item.id === itemId);
+                        if (itemData) {
+                            itemName = itemData.name || itemId;
+                            itemWeight = itemData.weight || 0;
+                        }
+                    }
+                    
+                    recipeWeight += itemWeight * amount; // kg
                     
                     const totalNeeded = amount * quantity;
-                    const userHas = this.state.inventory[itemId] || 0;
+                    const userHas = this.state.settings.includeInventory ? (this.state.inventory[itemId] || 0) : 0;
                     const missing = Math.max(0, totalNeeded - userHas);
                     
                     if (missing > 0) {
                         canCraftAll = false;
-                        missingItems.push({ itemId, missing, displayName: itemData.displayName || itemId });
+                        missingItems.push({ itemId, missing, displayName: itemName });
                     }
                     
                     // Show requirement
@@ -687,7 +978,7 @@
                     reqDiv.className = 'requirement-item';
                     reqDiv.dataset.itemId = itemId;
                     reqDiv.innerHTML = `
-                        <span>${itemData.displayName || itemId}</span>
+                        <span>${itemName}</span>
                         <span>${totalNeeded} (Have: ${userHas}, Need: ${missing})</span>
                     `;
                     requirementsDiv.appendChild(reqDiv);
@@ -700,9 +991,9 @@
                     });
                 });
                 
-                // Calculate how many recipes fit in one trip (approx 9000 weight capacity)
-                const maxWeight = 9000; // Default max weight
-                const recipesPerTrip = Math.floor(maxWeight / recipeWeight);
+                // Calculate how many recipes fit in one trip based on trailer capacity
+                const trailerCapacity = this.state.settings.trailerCapacity;
+                const recipesPerTrip = recipeWeight > 0 ? Math.floor(trailerCapacity / recipeWeight) : 1;
                 totalRunsNeeded = Math.ceil(quantity / recipesPerTrip);
                 
                 // Display results
@@ -739,7 +1030,7 @@
                 // Show notification
                 this.sendCommand({
                     type: 'notification',
-                    text: `Route set for ${itemId} (placeholder)`
+                    text: `Route set for ${itemId} (${amountNeeded} needed)`
                 });
             }
         }
