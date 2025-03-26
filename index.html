@@ -213,6 +213,19 @@
             padding: 2px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -295,14 +308,12 @@
             </div>
             
             <button id="reset-settings">Reset to Defaults</button>
+            <button id="clear-cache" style="margin-top: 10px;">Clear API Cache</button>
+            <button id="debug-button" style="margin-top: 10px; background-color: rgba(142, 68, 173, 0.8);">Debug Info</button>
         </div>
         
         <div class="resize-handle" id="resizeHandle"></div>
     </div>
-
-    <!-- Load the EJS data files -->
-    <script src="items.ejs" type="text/javascript"></script>
-    <script src="recipes.ejs" type="text/javascript"></script>
     
     <!-- Main App Script -->
     <script>
@@ -330,6 +341,12 @@
                 
                 // Refresh timer
                 this.refreshTimer = null;
+                
+                // API URLs
+                this.apiUrls = {
+                    itemInfo: 'https://ttycoon.eu/api/v1/serverdata/iteminfo',
+                    trailerConfig: 'https://ttycoon.eu/api/v1/serverdata/trailerconfig'
+                };
             }
             
             // Initialize the app
@@ -348,11 +365,11 @@
                 // Set up game connection
                 this.setupGameConnection();
                 
-                // Load data from EJS files
-                this.loadData();
-                
                 // Load settings
                 this.loadSettings();
+                
+                // Load data from API
+                this.loadData();
                 
                 // Center menu initially
                 const menuContainer = this.elements.menuContainer;
@@ -394,7 +411,9 @@
                     trailerCapacity: document.getElementById('trailer-capacity'),
                     includeInventory: document.getElementById('include-inventory'),
                     autoRefresh: document.getElementById('auto-refresh'),
-                    resetSettings: document.getElementById('reset-settings')
+                    resetSettings: document.getElementById('reset-settings'),
+                    clearCache: document.getElementById('clear-cache'),
+                    debugButton: document.getElementById('debug-button')
                 };
             }
             
@@ -455,6 +474,16 @@
                 // Reset settings button
                 elements.resetSettings.addEventListener('click', () => {
                     this.resetSettings();
+                });
+                
+                // Clear cache button
+                elements.clearCache.addEventListener('click', () => {
+                    this.clearApiCache();
+                });
+                
+                // Debug button
+                elements.debugButton.addEventListener('click', () => {
+                    this.debugRecipes();
                 });
                 
                 // ESC key handler
@@ -530,6 +559,19 @@
                     isDragging = false;
                     isResizing = false;
                 });
+            }
+            
+            // Clear API cache
+            clearApiCache() {
+                localStorage.removeItem('ttItemsCache');
+                localStorage.removeItem('ttItemsCacheTime');
+                localStorage.removeItem('ttTrailerCache');
+                localStorage.removeItem('ttTrailerCacheTime');
+                
+                this.updateStatusMessage('API cache cleared. Reloading data...', 'info');
+                
+                // Reload data
+                this.loadData();
             }
             
             // Set up game client communication
@@ -619,7 +661,13 @@
             // Send commands to the game client
             sendCommand(command) {
                 try {
-                    console.log('Sending command to game:', command);
+                    // Make sure command has a type
+                    if (!command.type) {
+                        console.error('Command missing type:', command);
+                        return;
+                    }
+                    
+                    console.log('Sending command to game:', JSON.stringify(command));
                     window.parent.postMessage(JSON.stringify(command), '*');
                 } catch (error) {
                     console.error('Failed to send command:', error);
@@ -690,12 +738,6 @@
                             itemName = itemData.name || itemId;
                             category = itemData.category || 'Unknown';
                         }
-                    } else if (window.ttItems && window.ttItems.allItems) {
-                        const itemData = window.ttItems.allItems.find(item => item.id === itemId);
-                        if (itemData) {
-                            itemName = itemData.name || itemId;
-                            category = itemData.category || 'Unknown';
-                        }
                     }
                     
                     // Add to category
@@ -753,72 +795,198 @@
             // Load recipe and item data
             async loadData() {
                 try {
+                    // Show loading indicator
+                    this.updateStatusMessage('Loading item data...', 'info');
+                    
+                    // Load items and recipes concurrently
                     await Promise.all([
                         this.loadItemsData(),
                         this.loadRecipesData()
                     ]);
                     
+                    // Update UI with loaded data
                     this.populateRecipeSelect();
                     this.updateStatusMessage('Data loaded successfully', 'success');
                 } catch (error) {
                     console.error('Failed to load data:', error);
-                    this.updateStatusMessage('Failed to load data. Check console for details.', 'error');
+                    this.updateStatusMessage('Failed to load data: ' + error.message, 'error');
                 }
             }
             
-            // Load items data
+            // Load items data from API
             async loadItemsData() {
-                // Try to get data from EJS-generated global
-                if (window.ttItems && window.ttItems.allItems) {
-                    this.state.itemsData = window.ttItems.allItems;
-                    return;
+                try {
+                    // Try to use cached API data from localStorage first
+                    const cachedData = localStorage.getItem('ttItemsCache');
+                    const cacheTimestamp = localStorage.getItem('ttItemsCacheTime');
+                    const cacheAge = cacheTimestamp ? (Date.now() - parseInt(cacheTimestamp)) : Infinity;
+                    
+                    // Check if we have valid cached data (less than 1 day old)
+                    if (cachedData && cacheAge < 86400000) {
+                        console.log('Using cached item data');
+                        this.state.itemsData = JSON.parse(cachedData);
+                        return;
+                    }
+                    
+                    // Fetch fresh data from API
+                    this.updateStatusMessage('Fetching items from API...');
+                    const response = await fetch(this.apiUrls.itemInfo);
+                    
+                    if (!response.ok) {
+                        throw new Error(`API returned ${response.status}`);
+                    }
+                    
+                    const apiData = await response.json();
+                    
+                    // Transform API data to our format
+                    const itemsData = [];
+                    
+                    // Process the API response
+                    Object.entries(apiData).forEach(([itemId, itemInfo]) => {
+                        // Skip items without proper info
+                        if (!itemInfo || !itemInfo.data) return;
+                        
+                        const data = itemInfo.data;
+                        
+                        // Determine category based on item properties
+                        let category = 'Unknown';
+                        if (itemId.startsWith('crafted_')) {
+                            category = 'Crafted';
+                        } else if (data.stackable) {
+                            category = 'Resource';
+                        }
+                        
+                        // Extract weight - usually in data.weight but might need conversion
+                        let weight = data.weight || 0;
+                        
+                        // Add to our items collection
+                        itemsData.push({
+                            id: itemId,
+                            name: data.label || itemId,
+                            weight: weight,
+                            category: category,
+                            stackable: data.stackable || false,
+                            icon: '📦' // Default icon
+                        });
+                    });
+                    
+                    // Cache the transformed data
+                    localStorage.setItem('ttItemsCache', JSON.stringify(itemsData));
+                    localStorage.setItem('ttItemsCacheTime', Date.now().toString());
+                    
+                    this.state.itemsData = itemsData;
+                    this.updateStatusMessage('Item data loaded from API', 'success');
+                } catch (error) {
+                    console.error('Failed to load items from API:', error);
+                    this.updateStatusMessage('API error. Using fallback item data.', 'warning');
+                    
+                    // Use our fallback data
+                    this.state.itemsData = [
+                        { id: "sand", name: "Sand", weight: 0.8, category: "Resource", icon: "🏝️" },
+                        { id: "gravel", name: "Gravel", weight: 1.2, category: "Resource", icon: "🪨" },
+                        { id: "clay", name: "Clay", weight: 0.9, category: "Resource", icon: "🧱" },
+                        { id: "log", name: "Log", weight: 3.0, category: "Resource", icon: "🪵" },
+                        { id: "crafted_concrete", name: "Concrete", weight: 1.5, category: "Crafted", icon: "🧊" },
+                        { id: "crafted_lumber", name: "Lumber", weight: 2.0, category: "Crafted", icon: "🪚" }
+                    ];
                 }
-                
-                // Fallback to ITEMS_DATA
-                if (typeof window.ITEMS_DATA !== 'undefined') {
-                    this.state.itemsData = window.ITEMS_DATA;
-                    return;
-                }
-                
-                this.updateStatusMessage('Items data not found. Using minimal item info.', 'warning');
-                
-                // Create minimal items data
-                this.state.itemsData = [
-                    { id: "sand", name: "Sand", weight: 0.8 },
-                    { id: "gravel", name: "Gravel", weight: 1.2 },
-                    { id: "clay", name: "Clay", weight: 0.9 },
-                    { id: "log", name: "Log", weight: 3.0 }
-                ];
             }
             
             // Load recipes data
             async loadRecipesData() {
-                // Try to get data from EJS-generated global
-                if (window.ttRecipes && window.ttRecipes.recipes) {
-                    this.state.recipesData = window.ttRecipes.recipes;
-                    return;
-                }
-                
-                // Fallback to RECIPES_DATA
-                if (typeof window.RECIPES_DATA !== 'undefined') {
-                    this.state.recipesData = window.RECIPES_DATA;
-                    return;
-                }
-                
-                this.updateStatusMessage('Recipes data not found. Using minimal recipe info.', 'warning');
-                
-                // Create minimal recipes data
-                this.state.recipesData = {
+                // Define basic recipes that will always be available
+                const basicRecipes = {
                     "Concrete": {
+                        category: "construction",
                         location: "Construction Site",
                         pays: 150,
                         ingredients: [
                             ["sand", 2],
                             ["gravel", 1]
                         ],
+                        output: "crafted_concrete",
+                        outputAmount: 1,
+                        craftTime: 30,
                         instructions: "Mix sand and gravel at the Construction Site mixer."
+                    },
+                    "Lumber": {
+                        category: "construction",
+                        location: "Sawmill",
+                        pays: 120,
+                        ingredients: [
+                            ["log", 1]
+                        ],
+                        output: "crafted_lumber",
+                        outputAmount: 3,
+                        craftTime: 25,
+                        instructions: "Process logs at the Sawmill to create lumber."
+                    },
+                    "Brick": {
+                        category: "construction",
+                        location: "Brickworks",
+                        pays: 180,
+                        ingredients: [
+                            ["clay", 2]
+                        ],
+                        output: "crafted_brick",
+                        outputAmount: 3,
+                        craftTime: 45,
+                        instructions: "Heat clay at the Brickworks kiln to create bricks."
                     }
                 };
+                
+                // Try to get recipes from window.ttRecipes if available
+                if (window.ttRecipes && window.ttRecipes.recipes) {
+                    console.log('Loading recipes from ttRecipes');
+                    this.state.recipesData = window.ttRecipes.recipes;
+                    return;
+                }
+                
+                // Try to get recipes from window.RECIPES_DATA if available
+                if (typeof window.RECIPES_DATA !== 'undefined') {
+                    console.log('Loading recipes from RECIPES_DATA');
+                    this.state.recipesData = window.RECIPES_DATA;
+                    return;
+                }
+                
+                // Use our basic recipes as a fallback
+                console.log('Using basic recipes fallback');
+                this.state.recipesData = basicRecipes;
+            }
+            
+            // Helper function to debug what recipes are available
+            debugRecipes() {
+                console.log('======== DEBUG RECIPES ========');
+                console.log('Recipe Data Source:');
+                
+                if (window.ttRecipes && window.ttRecipes.recipes) {
+                    console.log('window.ttRecipes exists with', Object.keys(window.ttRecipes.recipes).length, 'recipes');
+                    console.log('Recipe names:', Object.keys(window.ttRecipes.recipes));
+                } else {
+                    console.log('window.ttRecipes not found or empty');
+                }
+                
+                if (window.RECIPES_DATA) {
+                    console.log('window.RECIPES_DATA exists with', Object.keys(window.RECIPES_DATA).length, 'recipes');
+                    console.log('Recipe names:', Object.keys(window.RECIPES_DATA));
+                } else {
+                    console.log('window.RECIPES_DATA not found');
+                }
+                
+                console.log('Current state.recipesData has', Object.keys(this.state.recipesData || {}).length, 'recipes');
+                console.log('Recipe names:', Object.keys(this.state.recipesData || {}));
+                
+                // Show inventory state
+                console.log('Inventory data:', this.state.inventory);
+                
+                // Show items data
+                console.log('Items data count:', (this.state.itemsData || []).length);
+                console.log('First few items:', (this.state.itemsData || []).slice(0, 5));
+                
+                // Show message for user
+                this.updateStatusMessage('Debug info printed to console (F12)', 'info');
+                
+                console.log('======== END DEBUG ========');
             }
             
             // Populate recipe select dropdown
