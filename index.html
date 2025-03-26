@@ -10,25 +10,36 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
+            user-select: none;
         }
         .menu-container {
             width: 300px;
-            background-color: rgba(52, 73, 94, 0.7); /* Transparent background with 70% opacity */
+            background-color: rgba(52, 73, 94, 0.7);
             padding: 10px;
             border-radius: 8px;
+            position: absolute;
+            min-width: 200px;
+            min-height: 150px;
+            max-width: 500px;
+            max-height: 400px;
+            overflow: auto;
+        }
+        .menu-header {
+            padding-bottom: 10px;
+            cursor: move;
         }
         select, button {
             width: 100%;
             padding: 10px;
             margin: 5px 0;
-            background-color: rgba(22, 160, 133, 0.8); /* Slightly transparent teal */
+            background-color: rgba(22, 160, 133, 0.8);
             border: none;
             border-radius: 4px;
             color: white;
         }
         .ingredients-list {
             margin-top: 10px;
-            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black for readability */
+            background-color: rgba(0, 0, 0, 0.5);
             padding: 5px;
             border-radius: 4px;
         }
@@ -38,22 +49,99 @@
         }
         h2 {
             color: white;
-            margin-bottom: 10px;
+            margin: 0;
+            display: inline-block;
+        }
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 15px;
+            height: 15px;
+            background: rgba(255,255,255,0.5);
+            cursor: se-resize;
+            clip-path: polygon(100% 0, 0 100%, 100% 100%);
+            z-index: 10;
         }
     </style>
 </head>
 <body>
-    <div class="menu-container">
-        <h2>Recipe Menu</h2>
+    <div class="menu-container" id="menuContainer">
+        <div class="menu-header">
+            <h2>Recipe Menu</h2>
+        </div>
         <select id="recipeSelect">
             <!-- Recipe options will be populated here -->
         </select>
         <div id="ingredientsDisplay" class="ingredients-list">
             <!-- Ingredients for the selected recipe will appear here -->
         </div>
+        <div class="resize-handle" id="resizeHandle"></div>
     </div>
     <script>
-        // Example recipe data (you'll get this from the game API or static data for now)
+        const menuContainer = document.getElementById('menuContainer');
+        const resizeHandle = document.getElementById('resizeHandle');
+        const menuHeader = document.querySelector('.menu-header');
+
+        // Dragging functionality
+        let isDragging = false;
+        let startX, startY, startLeft, startTop;
+
+        menuHeader.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startLeft = menuContainer.offsetLeft;
+            startTop = menuContainer.offsetTop;
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            
+            let newLeft = startLeft + (e.clientX - startX);
+            let newTop = startTop + (e.clientY - startY);
+            
+            menuContainer.style.left = `${newLeft}px`;
+            menuContainer.style.top = `${newTop}px`;
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+
+        // Resizing functionality
+        let isResizing = false;
+        let startWidth, startHeight;
+
+        resizeHandle.addEventListener('mousedown', function(e) {
+            isResizing = true;
+            startWidth = menuContainer.offsetWidth;
+            startHeight = menuContainer.offsetHeight;
+            startX = e.clientX;
+            startY = e.clientY;
+            e.stopPropagation();
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isResizing) return;
+            
+            let newWidth = startWidth + (e.clientX - startX);
+            let newHeight = startHeight + (e.clientY - startY);
+            
+            // Constrain to min and max sizes
+            newWidth = Math.max(200, Math.min(newWidth, 500));
+            newHeight = Math.max(150, Math.min(newHeight, 400));
+            
+            menuContainer.style.width = `${newWidth}px`;
+            menuContainer.style.height = `${newHeight}px`;
+        });
+
+        document.addEventListener('mouseup', function(e) {
+            isResizing = false;
+        });
+
+        // Recipe selection logic (same as before)
         const recipes = {
             "Recipe 1": [
                 { name: "Ingredient A", amount: 5 },
@@ -66,6 +154,7 @@
         };
         const recipeSelect = document.getElementById('recipeSelect');
         const ingredientsDisplay = document.getElementById('ingredientsDisplay');
+        
         // Populate recipe dropdown
         for (let recipe in recipes) {
             let option = document.createElement('option');
@@ -73,6 +162,7 @@
             option.textContent = recipe;
             recipeSelect.appendChild(option);
         }
+        
         // Update ingredients display when recipe is selected
         recipeSelect.addEventListener('change', function() {
             const selectedRecipe = this.value;
@@ -85,6 +175,7 @@
                 ingredientsDisplay.appendChild(ingredientDiv);
             });
         });
+        
         // Initial load (first recipe)
         recipeSelect.dispatchEvent(new Event('change'));
     </script>
