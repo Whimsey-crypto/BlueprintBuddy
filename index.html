@@ -22,7 +22,7 @@
             min-width: 200px;
             min-height: 150px;
             max-width: 600px;
-            max-height: 750px; /* Increased from 500px to 750px */
+            max-height: 750px;
             overflow: auto;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
@@ -72,12 +72,6 @@
             border: none;
             border-radius: 4px;
             color: white;
-        }
-        select:disabled {
-            background-color: rgba(22, 160, 133, 0.4);
-        }
-        .category-select {
-            margin-bottom: 8px;
         }
         .ingredients-list {
             margin-top: 10px;
@@ -185,10 +179,6 @@
             width: 60px;
             text-align: right;
         }
-        .highlight {
-            font-weight: bold;
-            color: #ffcc00;
-        }
         input[type="number"] {
             width: 60px;
             background-color: rgba(22, 160, 133, 0.8);
@@ -200,7 +190,7 @@
         .inventory-tab {
             color: white;
         }
-.inventory-item {
+        .inventory-item {
             display: flex;
             justify-content: space-between;
             padding: 3px 5px;
@@ -229,25 +219,11 @@
             border-radius: 4px;
             color: white;
         }
-        .search-box::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
         .no-results {
             color: white;
             text-align: center;
             padding: 10px;
             font-style: italic;
-        }
-        .favorite-btn {
-            background: none;
-            border: none;
-            color: #aaa;
-            font-size: 16px;
-            cursor: pointer;
-            padding: 0 5px;
-        }
-        .favorite-btn.active {
-            color: #ffd700;
         }
         .status-indicator {
             color: white;
@@ -275,28 +251,16 @@
         
         <!-- Recipes Tab -->
         <div id="recipes-tab" class="tab-content active">
-            <input type="text" id="recipeSearch" class="search-box" placeholder="Search recipes...">
-            
-            <select id="categorySelect" class="category-select">
-                <option value="">All Categories</option>
-                <option value="trucker">Trucking</option>
-                <option value="fridge">Food/Refrigerated</option>
-                <option value="petrochem">Petrochemical</option>
-                <option value="military">Military</option>
-            </select>
-            
             <select id="recipeSelect">
-                <option value="">Select Recipe</option>
+                <option value="House" selected>House</option>
             </select>
             
             <div id="ingredientsDisplay" class="ingredients-list">
-                <div class="ingredient">
-                    <span class="ingredient-name">Select a recipe to view ingredients</span>
-                </div>
+                <!-- Ingredients will be displayed here -->
             </div>
             
-            <div class="location-name" id="recipe-location"></div>
-            <div class="recipe-cost" id="recipe-cost"></div>
+            <div class="location-name" id="recipe-location">Location: House Construction Site</div>
+            <div class="recipe-cost" id="recipe-cost">Pays: $2,350,000</div>
             
             <div class="stat-bar">
                 <div>Weight: <span id="recipe-weight">0</span> / <span id="max-weight">0</span></div>
@@ -306,7 +270,7 @@
             </div>
             
             <div class="instruction" id="recipe-instructions">
-                Select a recipe to view instructions
+                Combine construction materials at the construction site to build a house.
             </div>
         </div>
         
@@ -322,7 +286,8 @@
                         <span>Loading inventory data...</span>
                     </div>
                 </div>
-	<div class="stat-bar">
+                
+                <div class="stat-bar">
                     <div>Inventory Capacity: <span id="current-weight">0</span> / <span id="inventory-capacity">0</span></div>
                     <div class="progress-bar">
                         <div id="inventory-progress" class="progress-fill" style="width: 0%"></div>
@@ -340,85 +305,17 @@
             
             <div class="settings-section">
                 <div class="settings-row">
-                    <span class="settings-label">Strength Level:</span>
-                    <input type="number" id="strength-setting" min="1" max="30" value="10" class="settings-value">
-                </div>
-                
-                <div class="settings-row">
-                    <span class="settings-label">Truck Type:</span>
-                    <select id="truck-setting">
-                        <option value="0">Regular</option>
-                        <option value="6000">MK15</option>
-                    </select>
-                </div>
-                
-                <div class="settings-row">
-                    <span class="settings-label">Trailer Type:</span>
-                    <select id="trailer-setting">
-                        <option value="400">MK1 (400kg)</option>
-                        <option value="475">MK2 (475kg)</option>
-                        <option value="600">MK3 (600kg)</option>
-                        <option value="775">MK4 (775kg)</option>
-                        <option value="1000">MK5 (1000kg)</option>
-                        <option value="1500">MK6 (1500kg)</option>
-                        <option value="2200">MK7 (2200kg)</option>
-                        <option value="2500">MK8 (2500kg)</option>
-                        <option value="2750">MK9 (2750kg)</option>
-                        <option value="3000">MK10 (3000kg)</option>
-                        <option value="3500">MK11 (3500kg)</option>
-                        <option value="5000">MK12 (5000kg)</option>
-                        <option value="8500">MK13 (8500kg)</option>
-                        <option value="9000" selected>MK14 (9000kg)</option>
-                    </select>
-                </div>
-                
-                <div class="settings-row">
-                    <span class="settings-label">Premium Pass (+15%):</span>
-                    <input type="checkbox" id="premium-setting" checked>
-                </div>
-                
-                <div class="settings-row">
-                    <span class="settings-label">PostOp Perk (+15%):</span>
-                    <input type="checkbox" id="postop-setting">
-                </div>
-                
-                <div class="settings-row">
-                    <span class="settings-label">Farmers Milk (+20%):</span>
-                    <input type="checkbox" id="milk-setting">
-                </div>
-                
-                <div class="settings-row">
-                    <span class="settings-label">Total Capacity:</span>
-                    <span id="total-capacity" class="settings-value highlight">0</span>
-                </div>
-                
-                <div class="settings-row">
-                    <span class="settings-label">Auto-detect settings:</span>
-                    <input type="checkbox" id="auto-detect-setting" checked>
-                </div>
-            </div>
-            
-            <h3>Display Settings</h3>
-            
-            <div class="settings-section">
-                <div class="settings-row">
-                    <span class="settings-label">Show Missing Items:</span>
-                    <input type="checkbox" id="show-missing" checked>
+                    <span class="settings-label">Max Inventory Weight:</span>
+                    <input type="number" id="max-inventory-weight" min="1" max="20000" value="9000" class="settings-value">
                 </div>
                 
                 <div class="settings-row">
                     <span class="settings-label">Auto Refresh (secs):</span>
                     <input type="number" id="refresh-interval" min="0" max="60" value="10" class="settings-value">
                 </div>
-                
-                <div class="settings-row">
-                    <span class="settings-label">Favorite Recipes Only:</span>
-                    <input type="checkbox" id="favorites-only">
-                </div>
             </div>
             
             <button id="save-settings">Save Settings</button>
-            <button id="clear-favorites" style="background-color: rgba(231, 76, 60, 0.8);">Clear Favorites</button>
         </div>
         
         <div class="resize-handle" id="resizeHandle"></div>
@@ -435,237 +332,18 @@
             }
         }
         
-        // App State
+        // App State - Bare minimum
         const appState = {
-            recipes: {},
-            items: {},
             inventory: {},
             weight: 0,
-            maxWeight: 50,
-            strength: 10,
-            favorites: [],
-            gameData: {}, // Raw data received from game
-            lastDataUpdate: 0, // Timestamp of last data update
-            capacity: {
-                strength: 10,
-                strengthMultiplier: 10, // 10kg per level
-                baseCapacity: 0,
-                truckCapacity: 0,
-                trailerCapacity: 9000, // Default to MK14
-                premium: true, // Premium pass gives 15% bonus
-                premiumMultiplier: 0.15,
-                postOp: false, // PostOp perk gives 15% bonus
-                postOpMultiplier: 0.15,
-                milk: false, // Farmers Milk gives 20% bonus
-                milkMultiplier: 0.20,
-                autoDetect: true // Whether to auto-detect settings from game data
-            },
+            maxWeight: 9000,
             settings: {
-                showMissing: true,
-                refreshInterval: 10,
-                favoritesOnly: false
+                refreshInterval: 10
             },
-            version: "1.1.0" // App version for tracking updates
-        };
-	// DOM Elements
-        const menuContainer = document.getElementById('menuContainer');
-        const resizeHandle = document.getElementById('resizeHandle');
-        const menuHeader = document.querySelector('.menu-header');
-        const closeBtn = document.getElementById('closeBtn');
-        const tabs = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const categorySelect = document.getElementById('categorySelect');
-        const recipeSelect = document.getElementById('recipeSelect');
-        const recipeSearch = document.getElementById('recipeSearch');
-        const inventorySearch = document.getElementById('inventorySearch');
-        const ingredientsDisplay = document.getElementById('ingredientsDisplay');
-        const recipeInstructions = document.getElementById('recipe-instructions');
-        const recipeWeight = document.getElementById('recipe-weight');
-        const recipeLocation = document.getElementById('recipe-location');
-        const recipeCost = document.getElementById('recipe-cost');
-        const maxWeightDisplay = document.getElementById('max-weight');
-        const weightProgress = document.getElementById('weight-progress');
-        const playerInventoryDisplay = document.getElementById('player-inventory');
-        const currentWeightDisplay = document.getElementById('current-weight');
-        const inventoryCapacityDisplay = document.getElementById('inventory-capacity');
-        const inventoryProgressDisplay = document.getElementById('inventory-progress');
-        const refreshInventoryBtn = document.getElementById('refresh-inventory');
-        const strengthSetting = document.getElementById('strength-setting');
-        const inventoryCapacity = document.getElementById('inventory-capacity');
-        const showMissingSetting = document.getElementById('show-missing');
-        const refreshIntervalSetting = document.getElementById('refresh-interval');
-        const favoritesOnlySetting = document.getElementById('favorites-only');
-        const saveSettingsBtn = document.getElementById('save-settings');
-        const clearFavoritesBtn = document.getElementById('clear-favorites');
-        const statusMessage = document.getElementById('status-message');
-
-        // Initialize recipe database with a smaller subset of the original data
-        appState.recipes = {
-            "Battery": {
-                key_name: "batteries",
-                category: "ls-factory",
-                location: "LS Factory",
-                time: 1,
-                ingredients: [
-                    ["refined-zinc", 2],
-                    ["refined-solder", 4],
-                    ["scrap-acid", 8]
-                ],
-                products: [["batteries", 2]],
-                weight: 60,
-                cost: 5000,
-                instructions: "Combine zinc, solder and acid in a factory setting to create batteries."
-            },
-            "Bronze Alloy": {
-                key_name: "refined-bronze",
-                category: "ls-foundry",
-                location: "LS Foundry",
-                time: 1,
-                ingredients: [
-                    ["scrap-aluminum", 1],
-                    ["scrap-tin", 1],
-                    ["scrap-copper", 2]
-                ],
-                products: [["refined-bronze", 2]],
-                weight: 20,
-                cost: 1000,
-                instructions: "Mix aluminum, tin and copper in a foundry to create bronze alloy."
-            },
-            "Cement": {
-                key_name: "cement",
-                category: "quarry",
-                location: "Quarry",
-                time: 1,
-                ingredients: [
-                    ["refined-sand", 5],
-                    ["tcargodust", 2]
-                ],
-                products: [["cement", 1]],
-                weight: 25,
-                cost: 1500,
-                instructions: "Combine sand and sawdust at the quarry to create cement mix."
-            },
-            "Ceramic Tiles": {
-                key_name: "ceramictiles",
-                category: "ls-foundry",
-                location: "LS Foundry",
-                time: 1,
-                ingredients: [
-                    ["refined-sand", 2],
-                    ["refined-flint", 10]
-                ],
-                products: [["ceramictiles", 2]],
-                weight: 20,
-                cost: 1000,
-                instructions: "Mix sand and flint in a foundry to create ceramic tiles."
-            },
-            "Circuit Board": {
-                key_name: "circuit",
-                category: "ls-factory",
-                location: "LS Factory",
-                time: 1,
-                ingredients: [
-                    ["scrap-plastic", 10],
-                    ["refined-solder", 2],
-                    ["copperwire", 1]
-                ],
-                products: [["circuit", 2]],
-                weight: 40,
-                cost: 5000,
-                instructions: "Assemble plastic, solder and copper wire in a factory to create circuit boards."
-            },
-            "Computer": {
-                key_name: "computer",
-                category: "ls-factory",
-                location: "LS Factory",
-                time: 1,
-                ingredients: [
-                    ["circuit", 1],
-                    ["scrap-gold", 2],
-                    ["batteries", 1]
-                ],
-                products: [["computer", 2]],
-                weight: 70,
-                cost: 5000,
-                instructions: "Combine circuit boards, gold and batteries to create computers."
-            },
-            "Concrete": {
-                key_name: "concrete",
-                category: "filtering-plant",
-                location: "Filtering Plant",
-                time: 1,
-                ingredients: [
-                    ["cement", 5],
-                    ["liquid-water", 1]
-                ],
-                products: [["concrete", 1]],
-                weight: 160,
-                cost: 15000,
-                instructions: "Mix cement with water at the filtering plant to create concrete."
-            },
-            "Copper Wire": {
-                key_name: "copperwire",
-                category: "ls-factory",
-                location: "LS Factory",
-                time: 1,
-                ingredients: [
-                    ["refined-planks", 1],
-                    ["refined-copper", 4]
-                ],
-                products: [["copperwire", 2]],
-                weight: 40,
-                cost: 5000,
-                instructions: "Wind refined copper around wooden spools to create copper wire."
-            },
-            "Fiberglass Spool": {
-                key_name: "fiberglass",
-                category: "ls-factory",
-                location: "LS Factory",
-                time: 1,
-                ingredients: [
-                    ["refined-planks", 1],
-                    ["scrap-plastic", 8],
-                    ["refined-glass", 4]
-                ],
-                products: [["fiberglass", 2]],
-                weight: 40,
-                cost: 5000,
-                instructions: "Combine wood, plastic and glass to create fiberglass spools."
-            },
-            "Refined Flint": {
-                key_name: "refined-flint",
-                category: "filtering-plant",
-                location: "Filtering Plant",
-                time: 1,
-                ingredients: [
-                    ["scrap-gravel", 10]
-                ],
-                products: [
-                    ["refined-flint", 4],
-                    ["refined-sand", 6]
-                ],
-                weight: 50,
-                cost: 15000,
-                instructions: "Filter gravel at the filtering plant to separate flint and sand."
-            },
-            "Refined Glass": {
-                key_name: "refine-glass",
-                category: "ls-foundry",
-                location: "LS Foundry",
-                time: 1,
-                ingredients: [
-                    ["refined-sand", 1]
-                ],
-                products: [["refined-glass", 1]],
-                weight: 5,
-                cost: 1000,
-                instructions: "Melt sand in a foundry to create glass."
-            },
-            "House": {
-                key_name: "house",
-                category: "house-construction-site",
+            // Just the House recipe and its required items
+            recipe: {
+                name: "House",
                 location: "House Construction Site",
-                time: 1,
                 ingredients: [
                     ["ceramictiles", 4],
                     ["concrete", 1],
@@ -674,201 +352,80 @@
                     ["computer", 1],
                     ["rebar", 1]
                 ],
-                products: [["house", 1]],
-                weight: 0,
-                cost: 0,
                 pays: 2350000,
                 instructions: "Combine construction materials at the construction site to build a house."
+            },
+            items: {
+                "ceramictiles": { weight: 10 },
+                "concrete": { weight: 160 },
+                "refined-planks": { weight: 15 },
+                "copperwire": { weight: 20 },
+                "computer": { weight: 35 },
+                "rebar": { weight: 45 }
             }
         };
 
-        // Initialize item database
-        appState.items = {
-            "batteries": { weight: 30, stack_size: 300 },
-            "refined-bronze": { weight: 10, stack_size: 900 },
-            "cement": { weight: 25, stack_size: 360 },
-            "ceramictiles": { weight: 10, stack_size: 900 },
-            "circuit": { weight: 20, stack_size: 450 },
-            "computer": { weight: 35, stack_size: 257 },
-            "concrete": { weight: 160, stack_size: 56 },
-            "copperwire": { weight: 20, stack_size: 450 },
-            "fiberglass": { weight: 20, stack_size: 450 },
-            "refined-flint": { weight: 5, stack_size: 1800 },
-            "refined-glass": { weight: 5, stack_size: 1800 },
-            "refined-sand": { weight: 5, stack_size: 1800 },
-            "tcargodust": { weight: 3, stack_size: 3000 },
-            "scrap-aluminum": { weight: 5, stack_size: 1800 },
-            "scrap-copper": { weight: 5, stack_size: 1800 },
-            "scrap-gold": { weight: 10, stack_size: 900 },
-            "scrap-gravel": { weight: 5, stack_size: 1800 },
-            "scrap-plastic": { weight: 5, stack_size: 1800 },
-            "scrap-tin": { weight: 5, stack_size: 1800 },
-            "refined-copper": { weight: 10, stack_size: 900 },
-            "refined-planks": { weight: 15, stack_size: 600 },
-            "refined-solder": { weight: 5, stack_size: 1800 },
-            "refined-zinc": { weight: 10, stack_size: 900 },
-            "liquid-water": { weight: 100, stack_size: 90 },
-            "rebar": { weight: 45, stack_size: 200 },
-            "scrap-acid": { weight: 5, stack_size: 1800 }
-        }; "Filtering Plant",
-                time: 1,
-                ingredients: [
-                    ["cement", 5],
-                    ["liquid-water", 1]
-                ],
-                products: [["concrete", 1]],
-                weight: 160,
-                cost: 15000,
-                instructions: "Mix cement with water at the filtering plant to create concrete."
-            },
-            "Copper Wire": {
-                key_name: "copperwire",
-                category: "ls-factory",
-                location: "LS Factory",
-                time: 1,
-                ingredients: [
-                    ["refined-planks", 1],
-                    ["refined-copper", 4]
-                ],
-                products: [["copperwire", 2]],
-                weight: 40,
-                cost: 5000,
-                instructions: "Wind refined copper around wooden spools to create
-// Update max weight based on capacity settings
-        function updateMaxWeight() {
-            // Calculate total capacity
-            appState.maxWeight = calculateTotalCapacity();
+        // DOM Elements - Only what we need
+        const menuContainer = document.getElementById('menuContainer');
+        const resizeHandle = document.getElementById('resizeHandle');
+        const menuHeader = document.querySelector('.menu-header');
+        const closeBtn = document.getElementById('closeBtn');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const ingredientsDisplay = document.getElementById('ingredientsDisplay');
+        const recipeWeight = document.getElementById('recipe-weight');
+        const maxWeightDisplay = document.getElementById('max-weight');
+        const weightProgress = document.getElementById('weight-progress');
+        const playerInventoryDisplay = document.getElementById('player-inventory');
+        const inventorySearch = document.getElementById('inventorySearch');
+        const currentWeightDisplay = document.getElementById('current-weight');
+        const inventoryCapacityDisplay = document.getElementById('inventory-capacity');
+        const inventoryProgressDisplay = document.getElementById('inventory-progress');
+        const refreshInventoryBtn = document.getElementById('refresh-inventory');
+        const maxInventoryWeightSetting = document.getElementById('max-inventory-weight');
+        const refreshIntervalSetting = document.getElementById('refresh-interval');
+        const saveSettingsBtn = document.getElementById('save-settings');
+        const statusMessage = document.getElementById('status-message');
+
+        // Load settings from localStorage
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('blueprintBuddy_settings');
+            if (savedSettings) {
+                const parsedSettings = JSON.parse(savedSettings);
+                appState.settings = { ...appState.settings, ...parsedSettings };
+                refreshIntervalSetting.value = appState.settings.refreshInterval;
+            }
             
-            // Update UI elements
+            const savedMaxWeight = localStorage.getItem('blueprintBuddy_maxWeight');
+            if (savedMaxWeight) {
+                appState.maxWeight = parseInt(savedMaxWeight);
+                maxInventoryWeightSetting.value = appState.maxWeight;
+            }
+            
             maxWeightDisplay.textContent = appState.maxWeight;
-            inventoryCapacity.textContent = appState.maxWeight;
-            
-            // Update progress bar
-            updateInventoryWeight();
+            inventoryCapacityDisplay.textContent = appState.maxWeight;
         }
-        
-        // Auto-detect settings from game data
-        function autoDetectSettings() {
-            if (!appState.capacity.autoDetect) return;
+
+        // Save settings to localStorage
+        function saveSettings() {
+            appState.maxWeight = parseInt(maxInventoryWeightSetting.value) || 9000;
             
-            let settingsChanged = false;
+            const settingsToSave = {
+                refreshInterval: parseInt(refreshIntervalSetting.value) || 0
+            };
             
-            // Try to detect strength from game data
-            // First check for direct strength value
-            if (appState.gameData.strength) {
-                const strength = parseInt(appState.gameData.strength);
-                if (!isNaN(strength) && strength > 0) {
-                    if (appState.capacity.strength !== strength) {
-                        appState.capacity.strength = strength;
-                        document.getElementById('strength-setting').value = strength;
-                        settingsChanged = true;
-                    }
-                }
-            } 
-            // Then check for calculated strength from experience
-            else if (appState.gameData.calculatedStrength) {
-                const strength = appState.gameData.calculatedStrength;
-                if (appState.capacity.strength !== strength) {
-                    appState.capacity.strength = strength;
-                    document.getElementById('strength-setting').value = strength;
-                    settingsChanged = true;
-                }
-            }
+            localStorage.setItem('blueprintBuddy_settings', JSON.stringify(settingsToSave));
+            localStorage.setItem('blueprintBuddy_maxWeight', appState.maxWeight.toString());
             
-            // Try to detect vehicle type
-            if (appState.gameData.vehicle) {
-                const vehicleType = appState.gameData.vehicle;
-                if (vehicleType.includes('mk15')) {
-                    if (appState.capacity.truckCapacity !== 6000) {
-                        appState.capacity.truckCapacity = 6000;
-                        document.getElementById('truck-setting').value = "6000";
-                        settingsChanged = true;
-                    }
-                } else {
-                    if (appState.capacity.truckCapacity !== 0) {
-                        appState.capacity.truckCapacity = 0;
-                        document.getElementById('truck-setting').value = "0";
-                        settingsChanged = true;
-                    }
-                }
-            }
+            appState.settings = settingsToSave;
             
-            // Try to detect trailer type from trailer data
-            if (appState.gameData.trailer) {
-                const trailer = appState.gameData.trailer.toLowerCase();
-                
-                // Map trailer types to capacity values
-                let trailerCapacity = 9000; // Default to MK14
-                
-                if (trailer.includes('mk1trailer')) trailerCapacity = 400;
-                else if (trailer.includes('mk2trailer')) trailerCapacity = 475;
-                else if (trailer.includes('mk3trailer')) trailerCapacity = 600;
-                else if (trailer.includes('mk4trailer')) trailerCapacity = 775;
-                else if (trailer.includes('mk5trailer')) trailerCapacity = 1000;
-                else if (trailer.includes('mk6trailer')) trailerCapacity = 1500;
-                else if (trailer.includes('mk7trailer')) trailerCapacity = 2200;
-                else if (trailer.includes('mk8trailer')) trailerCapacity = 2500;
-                else if (trailer.includes('mk9trailer')) trailerCapacity = 2750;
-                else if (trailer.includes('mk10trailer')) trailerCapacity = 3000;
-                else if (trailer.includes('mk11trailer')) trailerCapacity = 3500;
-                else if (trailer.includes('mk12trailer')) trailerCapacity = 5000;
-                else if (trailer.includes('mk13trailer')) trailerCapacity = 8500;
-                else if (trailer.includes('mk14trailer')) trailerCapacity = 9000;
-                
-                if (appState.capacity.trailerCapacity !== trailerCapacity) {
-                    appState.capacity.trailerCapacity = trailerCapacity;
-                    document.getElementById('trailer-setting').value = trailerCapacity.toString();
-                    settingsChanged = true;
-                }
-            }
+            maxWeightDisplay.textContent = appState.maxWeight;
+            inventoryCapacityDisplay.textContent = appState.maxWeight;
             
-            // If settings changed, update capacity calculation
-            if (settingsChanged) {
-                updateMaxWeight();
-                
-                // Update status message
-                statusMessage.textContent = 'Auto-detected settings updated';
-                statusMessage.style.backgroundColor = 'rgba(41, 128, 185, 0.5)'; // Blue
-            }
-        }
-        
-        // Load capacity settings from localStorage
-        function loadCapacitySettings() {
-            const savedCapacity = localStorage.getItem('blueprintBuddy_capacity');
-            if (savedCapacity) {
-                const parsedCapacity = JSON.parse(savedCapacity);
-                appState.capacity = { ...appState.capacity, ...parsedCapacity };
-                
-                // Update UI with loaded settings
-                document.getElementById('strength-setting').value = appState.capacity.strength;
-                document.getElementById('truck-setting').value = appState.capacity.truckCapacity;
-                document.getElementById('trailer-setting').value = appState.capacity.trailerCapacity;
-                document.getElementById('premium-setting').checked = appState.capacity.premium;
-                document.getElementById('postop-setting').checked = appState.capacity.postOp;
-                document.getElementById('milk-setting').checked = appState.capacity.milk;
-                document.getElementById('auto-detect-setting').checked = appState.capacity.autoDetect;
-                
-                // Update capacity calculation
-                updateMaxWeight();
-            }
-        }
-        
-        // Save capacity settings to localStorage
-        function saveCapacitySettings() {
-            // Get values from UI
-            appState.capacity.strength = parseInt(document.getElementById('strength-setting').value) || 10;
-            appState.capacity.truckCapacity = parseInt(document.getElementById('truck-setting').value) || 0;
-            appState.capacity.trailerCapacity = parseInt(document.getElementById('trailer-setting').value) || 9000;
-            appState.capacity.premium = document.getElementById('premium-setting').checked;
-            appState.capacity.postOp = document.getElementById('postop-setting').checked;
-            appState.capacity.milk = document.getElementById('milk-setting').checked;
-            appState.capacity.autoDetect = document.getElementById('auto-detect-setting').checked;
+            setupAutoRefresh();
             
-            // Save to localStorage
-            localStorage.setItem('blueprintBuddy_capacity', JSON.stringify(appState.capacity));
-            
-            // Update capacity calculation
-            updateMaxWeight();
+            statusMessage.textContent = 'Settings saved successfully';
+            statusMessage.style.backgroundColor = 'rgba(46, 204, 113, 0.5)'; // Green
         }
 
         // Update inventory weight calculation
@@ -899,60 +456,14 @@
             }
         }
 
-        // Populate recipe options based on category filter and search term
-        function populateRecipeOptions() {
-            const category = categorySelect.value;
-            const searchTerm = recipeSearch.value.toLowerCase();
-            const favoritesOnly = appState.settings.favoritesOnly;
-            
-            // Clear current options
-            recipeSelect.innerHTML = '<option value="">Select Recipe</option>';
-            
-            // Filter and add recipe options
-            Object.entries(appState.recipes)
-                .filter(([name, recipe]) => {
-                    // Apply category filter if selected
-                    const categoryMatch = !category || recipe.category.includes(category);
-                    
-                    // Apply search filter if entered
-                    const searchMatch = !searchTerm || 
-                        name.toLowerCase().includes(searchTerm) || 
-                        recipe.key_name.toLowerCase().includes(searchTerm);
-                    
-                    // Apply favorites filter if enabled
-                    const favoriteMatch = !favoritesOnly || appState.favorites.includes(name);
-                    
-                    return categoryMatch && searchMatch && favoriteMatch;
-                })
-                .sort((a, b) => a[0].localeCompare(b[0])) // Sort alphabetically
-                .forEach(([name, recipe]) => {
-                    const option = document.createElement('option');
-                    option.value = name;
-                    option.textContent = name;
-                    recipeSelect.appendChild(option);
-                });
-            
-            // Check if no recipes match filters
-            if (recipeSelect.options.length <= 1) {
-                const option = document.createElement('option');
-                option.value = "";
-                option.textContent = "No recipes match filters";
-                option.disabled = true;
-                recipeSelect.appendChild(option);
-            }
-        }
-
-        // Display recipe details
-        function displayRecipeDetails(recipeName) {
-            const recipe = appState.recipes[recipeName];
-            if (!recipe) return;
-            
+        // Display recipe details - Fixed for the House recipe
+        function displayRecipeDetails() {
             ingredientsDisplay.innerHTML = '';
             
             let totalWeight = 0;
             
             // Calculate if user has ingredients and total weight
-            recipe.ingredients.forEach(([itemId, amount]) => {
+            appState.recipe.ingredients.forEach(([itemId, amount]) => {
                 const itemData = appState.items[itemId] || { weight: 0 };
                 const userHas = appState.inventory[itemId] || 0;
                 
@@ -997,44 +508,6 @@
             } else {
                 weightProgress.style.backgroundColor = 'rgba(22, 160, 133, 0.8)';
             }
-            
-            // Update location and cost
-            recipeLocation.textContent = `Location: ${recipe.location}`;
-            
-            if (recipe.cost > 0) {
-                recipeCost.textContent = `Cost: $${recipe.cost.toLocaleString()}`;
-            } else if (recipe.pays > 0) {
-                recipeCost.textContent = `Pays: $${recipe.pays.toLocaleString()}`;
-            } else {
-                recipeCost.textContent = '';
-            }
-            
-            // Update instructions
-            recipeInstructions.textContent = recipe.instructions || 'No instructions available';
-            
-            // Add favorite button
-            const isFavorite = appState.favorites.includes(recipeName);
-            const favoriteBtn = document.createElement('button');
-            favoriteBtn.className = `favorite-btn ${isFavorite ? 'active' : ''}`;
-            favoriteBtn.textContent = isFavorite ? '★' : '☆';
-            favoriteBtn.title = isFavorite ? 'Remove from favorites' : 'Add to favorites';
-            favoriteBtn.onclick = () => toggleFavorite(recipeName);
-            
-            recipeInstructions.appendChild(document.createElement('br'));
-            recipeInstructions.appendChild(favoriteBtn);
-        }
-
-        // Toggle favorite status for a recipe
-        function toggleFavorite(recipeName) {
-            const index = appState.favorites.indexOf(recipeName);
-            if (index === -1) {
-                appState.favorites.push(recipeName);
-            } else {
-                appState.favorites.splice(index, 1);
-            }
-            
-            saveFavorites();
-            displayRecipeDetails(recipeName); // Refresh display
         }
 
         // Display inventory items
@@ -1075,15 +548,10 @@
         // Get inventory data from game
         function getInventoryData() {
             try {
-                // Update status indicator
                 statusMessage.textContent = 'Requesting inventory data...';
                 statusMessage.style.backgroundColor = 'rgba(243, 156, 18, 0.5)'; // Orange
                 
-                // Request inventory data from game
-                sendCommand({ type: 'getNamedData', keys: ['inventory', 'weight', 'max_weight', 'vehicle', 'trailer', 'strength', 'exp_trucker_strength'] });
-                
-                // We'll rely on the message event listener to process the response
-                // Data will be handled by processGameData() function
+                sendCommand({ type: 'getNamedData', keys: ['inventory', 'weight', 'max_weight'] });
             } catch (error) {
                 console.error('Failed to get inventory data:', error);
                 statusMessage.textContent = 'Error requesting data: ' + error.message;
@@ -1095,25 +563,14 @@
         function processGameData(data) {
             console.log('Received game data:', data);
             
-            // Update status indicator
             statusMessage.textContent = 'Data received, processing...';
-            
-            // Store raw game data
-            for (const [key, value] of Object.entries(data)) {
-                appState.gameData[key] = value;
-            }
             
             // Handle inventory data
             if (data.inventory) {
                 try {
                     appState.inventory = JSON.parse(data.inventory);
                     displayInventory();
-                    
-                    // If a recipe is selected, refresh its display
-                    const selectedRecipe = recipeSelect.value;
-                    if (selectedRecipe) {
-                        displayRecipeDetails(selectedRecipe);
-                    }
+                    displayRecipeDetails(); // Update recipe display with new inventory
                     
                     // Show last update time
                     const now = new Date();
@@ -1127,82 +584,23 @@
                 }
             }
             
-            // Handle weight and capacity data
+            // Handle weight data
             if (data.weight !== undefined) {
                 appState.weight = parseInt(data.weight);
                 currentWeightDisplay.textContent = appState.weight;
             }
             
-            if (data.max_weight !== undefined) {
-                // We'll store the game's max weight, but still use our calculation
-                appState.gameData.maxWeight = parseInt(data.max_weight);
-                
-                // If we're not using calculated weights, use the game value
-                if (!appState.capacity.autoDetect) {
-                    appState.maxWeight = appState.gameData.maxWeight;
-                    maxWeightDisplay.textContent = appState.maxWeight;
-                    inventoryCapacity.textContent = appState.maxWeight;
-                }
-            }
-            
-            // Check for strength skill data
-            if (data.exp_trucker_strength !== undefined) {
-                // Calculate strength level from experience
-                // level = (math.sqrt(1 + 8 * experience / 5) - 1) / 2
-                const exp = parseFloat(data.exp_trucker_strength);
-                if (!isNaN(exp)) {
-                    const level = Math.floor((Math.sqrt(1 + 8 * exp / 5) - 1) / 2);
-                    appState.gameData.calculatedStrength = level;
-                    console.log('Calculated strength level:', level);
-                }
-            }
-            
-            // Check for strength directly
-            if (data.strength !== undefined) {
-                const strength = parseInt(data.strength);
-                if (!isNaN(strength)) {
-                    appState.gameData.strength = strength;
-                }
-            }
-            
-            // Check for vehicle data to determine capacity
-            if (data.vehicle !== undefined) {
-                appState.gameData.vehicle = data.vehicle;
-            }
-            
-            if (data.trailer !== undefined) {
-                appState.gameData.trailer = data.trailer;
-            }
-            
-            // Auto-detect settings if enabled
-            if (appState.capacity.autoDetect) {
-                autoDetectSettings();
-            }
-            
             // Update UI elements
             updateInventoryWeight();
-            
-            // Set timestamp for last data update
-            appState.lastDataUpdate = new Date().getTime();
-        }
-        
-        // Request specific data from the game client
-        function requestGameData(keys = []) {
-            if (keys.length > 0) {
-                sendCommand({ type: 'getNamedData', keys: keys });
-            } else {
-                sendCommand({ type: 'getData' });
-            }
         }
 
         // Initialize app
         function initApp() {
             console.log('Initializing BlueprintBuddy...');
             
-            // Setup status indicator
             statusMessage.textContent = 'Initializing BlueprintBuddy...';
             
-            // Movable window functionality
+            // Set up movable window
             let isDragging = false;
             let startX, startY, startLeft, startTop;
 
@@ -1233,7 +631,7 @@
                 isDragging = false;
             });
 
-            // Resizable window functionality
+            // Set up resizable window
             let isResizing = false;
             let startWidth, startHeight;
 
@@ -1252,7 +650,6 @@
                 let newWidth = startWidth + (e.clientX - startX);
                 let newHeight = startHeight + (e.clientY - startY);
                 
-                // Constrain to min and max sizes (increased max height to 750px)
                 newWidth = Math.max(200, Math.min(600, newWidth));
                 newHeight = Math.max(150, Math.min(750, newHeight));
                 
@@ -1264,14 +661,12 @@
                 isResizing = false;
             });
 
-            // Tab switching functionality
+            // Set up tab switching
             tabs.forEach(tab => {
                 tab.addEventListener('click', function() {
-                    // Remove active class from all tabs and tab contents
                     tabs.forEach(t => t.classList.remove('active'));
                     tabContents.forEach(c => c.classList.remove('active'));
                     
-                    // Add active class to clicked tab and corresponding content
                     this.classList.add('active');
                     const tabId = this.getAttribute('data-tab');
                     document.getElementById(`${tabId}-tab`).classList.add('active');
@@ -1284,93 +679,44 @@
                 sendCommand({ type: 'close' });
             });
 
-            // Recipe selection functionality
-            categorySelect.addEventListener('change', populateRecipeOptions);
-            recipeSearch.addEventListener('input', populateRecipeOptions);
-            
-            recipeSelect.addEventListener('change', function() {
-                const selectedRecipe = this.value;
-                if (selectedRecipe) {
-                    displayRecipeDetails(selectedRecipe);
-                } else {
-                    ingredientsDisplay.innerHTML = '<div class="ingredient"><span class="ingredient-name">Select a recipe to view ingredients</span></div>';
-                    recipeInstructions.textContent = 'Select a recipe to view instructions';
-                    recipeWeight.textContent = '0';
-                    weightProgress.style.width = '0%';
-                    recipeLocation.textContent = '';
-                    recipeCost.textContent = '';
-                }
-            });
-
             // Inventory functionality
-            refreshInventoryBtn.addEventListener('click', function() {
-                requestGameData(['inventory', 'weight', 'max_weight', 'vehicle', 'trailer', 'strength', 'exp_trucker_strength']);
-            });
+            refreshInventoryBtn.addEventListener('click', getInventoryData);
             inventorySearch.addEventListener('input', displayInventory);
 
             // Settings functionality
             saveSettingsBtn.addEventListener('click', saveSettings);
-            
-            clearFavoritesBtn.addEventListener('click', function() {
-                if (confirm('Are you sure you want to clear all favorites?')) {
-                    appState.favorites = [];
-                    saveFavorites();
-                    populateRecipeOptions();
-                }
-            });
 
-            // Set up auto-refresh if interval > 0
-            let refreshIntervalID = null;
-            
+            // Auto-refresh setup
             function setupAutoRefresh() {
-                if (refreshIntervalID) {
-                    clearInterval(refreshIntervalID);
-                    refreshIntervalID = null;
+                if (window.refreshIntervalID) {
+                    clearInterval(window.refreshIntervalID);
+                    window.refreshIntervalID = null;
                 }
                 
                 if (appState.settings.refreshInterval > 0) {
-                    refreshIntervalID = setInterval(function() {
-                        requestGameData(['inventory', 'weight', 'max_weight', 'vehicle', 'trailer', 'strength', 'exp_trucker_strength']);
-                    }, appState.settings.refreshInterval * 1000);
-                    
+                    window.refreshIntervalID = setInterval(getInventoryData, 
+                                                    appState.settings.refreshInterval * 1000);
                     console.log(`Auto-refresh set up for every ${appState.settings.refreshInterval} seconds`);
                 }
             }
 
             // Initial setup
             loadSettings();
-            populateRecipeOptions();
-            displayInventory();
-            updateInventoryWeight();
-            calculateTotalCapacity(); // Calculate initial capacity
+            displayRecipeDetails();
             setupAutoRefresh();
-            
-            // Add event listeners for capacity settings
-            document.getElementById('strength-setting').addEventListener('input', calculateTotalCapacity);
-            document.getElementById('truck-setting').addEventListener('change', calculateTotalCapacity);
-            document.getElementById('trailer-setting').addEventListener('change', calculateTotalCapacity);
-            document.getElementById('premium-setting').addEventListener('change', calculateTotalCapacity);
-            document.getElementById('postop-setting').addEventListener('change', calculateTotalCapacity);
-            document.getElementById('milk-setting').addEventListener('change', calculateTotalCapacity);
-            document.getElementById('auto-detect-setting').addEventListener('change', function() {
-                if (this.checked) {
-                    autoDetectSettings();
-                }
-            });
             
             // Position in center of screen initially
             menuContainer.style.left = `${(window.innerWidth - menuContainer.offsetWidth) / 2}px`;
             menuContainer.style.top = `${(window.innerHeight - menuContainer.offsetHeight) / 2}px`;
             
-            // Keyboard event to ensure game controls work
+            // ESC key handler
             document.addEventListener('keydown', function(e) {
-                // Forward ESC key to game client to ensure game controls work
                 if (e.key === 'Escape') {
                     sendCommand({ type: 'pin' });
                 }
             });
             
-            // Listen for game data
+            // Message listener for game data
             window.addEventListener('message', function(event) {
                 try {
                     const data = JSON.parse(event.data);
@@ -1380,10 +726,9 @@
                 }
             });
             
-            // Request initial data from game client
-            requestGameData(['inventory', 'weight', 'max_weight', 'strength', 'vehicle', 'trailer', 'exp_trucker_strength']);
+            // Request initial data from game
+            getInventoryData();
             
-            // Notify that we're ready
             statusMessage.textContent = 'BlueprintBuddy ready and waiting for game data';
             statusMessage.style.backgroundColor = 'rgba(22, 160, 133, 0.5)'; // Teal
         }
