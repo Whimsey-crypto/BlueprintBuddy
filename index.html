@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Menu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+        }
+        .menu-container {
+            width: 300px;
+            background-color: #34495e;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #16a085;
+            border: none;
+            border-radius: 4px;
+            color: white;
+        }
+        .ingredients-list {
+            margin-top: 10px;
+        }
+        .ingredient {
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-container">
+        <h2>Recipe Menu</h2>
+        <select id="recipeSelect">
+            <!-- Recipe options will be populated here -->
+        </select>
+        <div id="ingredientsDisplay" class="ingredients-list">
+            <!-- Ingredients for the selected recipe will appear here -->
+        </div>
+    </div>
+
+    <script>
+        // Example recipe data (you'll get this from the game API or static data for now)
+        const recipes = {
+            "Recipe 1": [
+                { name: "Ingredient A", amount: 5 },
+                { name: "Ingredient B", amount: 3 }
+            ],
+            "Recipe 2": [
+                { name: "Ingredient C", amount: 2 },
+                { name: "Ingredient D", amount: 4 }
+            ]
+        };
+
+        const recipeSelect = document.getElementById('recipeSelect');
+        const ingredientsDisplay = document.getElementById('ingredientsDisplay');
+
+        // Populate recipe dropdown
+        for (let recipe in recipes) {
+            let option = document.createElement('option');
+            option.value = recipe;
+            option.textContent = recipe;
+            recipeSelect.appendChild(option);
+        }
+
+        // Update ingredients display when recipe is selected
+        recipeSelect.addEventListener('change', function() {
+            const selectedRecipe = this.value;
+            const ingredients = recipes[selectedRecipe];
+
+            ingredientsDisplay.innerHTML = ''; // Clear existing ingredients
+
+            ingredients.forEach(ingredient => {
+                let ingredientDiv = document.createElement('div');
+                ingredientDiv.classList.add('ingredient');
+                ingredientDiv.textContent = `${ingredient.name}: ${ingredient.amount}`;
+                ingredientsDisplay.appendChild(ingredientDiv);
+            });
+        });
+
+        // Initial load (first recipe)
+        recipeSelect.dispatchEvent(new Event('change'));
+    </script>
+</body>
+</html>
