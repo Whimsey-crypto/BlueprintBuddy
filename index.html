@@ -22,7 +22,7 @@
             min-width: 200px;
             min-height: 150px;
             max-width: 600px;
-            max-height: 500px;
+            max-height: 750px; /* Increased from 500px to 750px */
             overflow: auto;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
@@ -200,7 +200,7 @@
         .inventory-tab {
             color: white;
         }
-        .inventory-item {
+.inventory-item {
             display: flex;
             justify-content: space-between;
             padding: 3px 5px;
@@ -248,6 +248,15 @@
         }
         .favorite-btn.active {
             color: #ffd700;
+        }
+        .status-indicator {
+            color: white;
+            font-size: 0.8em;
+            padding: 4px;
+            border-radius: 3px;
+            margin-top: 5px;
+            text-align: center;
+            background-color: rgba(22, 160, 133, 0.5);
         }
     </style>
 </head>
@@ -313,8 +322,7 @@
                         <span>Loading inventory data...</span>
                     </div>
                 </div>
-                
-                <div class="stat-bar">
+	<div class="stat-bar">
                     <div>Inventory Capacity: <span id="current-weight">0</span> / <span id="inventory-capacity">0</span></div>
                     <div class="progress-bar">
                         <div id="inventory-progress" class="progress-fill" style="width: 0%"></div>
@@ -322,10 +330,11 @@
                 </div>
                 
                 <button id="refresh-inventory">Refresh Inventory</button>
+                <div id="status-message" class="status-indicator">Waiting for game data...</div>
             </div>
         </div>
         
-        // Settings Tab
+        <!-- Settings Tab -->
         <div id="settings-tab" class="tab-content">
             <h3>Capacity Settings</h3>
             
@@ -419,129 +428,13 @@
         // Game client communication function
         function sendCommand(command) {
             try {
+                console.log('Sending command to game:', command);
                 window.parent.postMessage(JSON.stringify(command), '*');
             } catch (error) {
                 console.error('Failed to send command:', error);
             }
         }
         
-        // Rational class (simplified from original app)
-        class Rational {
-            constructor(numerator, denominator = 1) {
-                this.numerator = numerator;
-                this.denominator = denominator;
-                this.simplify();
-            }
-            
-            simplify() {
-                const gcd = this.gcd(Math.abs(this.numerator), this.denominator);
-                this.numerator /= gcd;
-                this.denominator /= gcd;
-                return this;
-            }
-            
-            gcd(a, b) {
-                while (b) {
-                    const t = b;
-                    b = a % b;
-                    a = t;
-                }
-                return a;
-            }
-            
-            mul(other) {
-                if (typeof other === 'number') {
-                    return new Rational(this.numerator * other, this.denominator);
-                } else {
-                    return new Rational(
-                        this.numerator * other.numerator,
-                        this.denominator * other.denominator
-                    );
-                }
-            }
-            
-            div(other) {
-                if (typeof other === 'number') {
-                    return new Rational(this.numerator, this.denominator * other);
-                } else {
-                    return new Rational(
-                        this.numerator * other.denominator,
-                        this.denominator * other.numerator
-                    );
-                }
-            }
-            
-            add(other) {
-                if (typeof other === 'number') {
-                    return new Rational(
-                        this.numerator + other * this.denominator,
-                        this.denominator
-                    );
-                } else {
-                    return new Rational(
-                        this.numerator * other.denominator + other.numerator * this.denominator,
-                        this.denominator * other.denominator
-                    );
-                }
-            }
-            
-            toFloat() {
-                return this.numerator / this.denominator;
-            }
-            
-            toString() {
-                return `${this.numerator}/${this.denominator}`;
-            }
-            
-            static from_float(value) {
-                const precision = 1000000;
-                return new Rational(Math.round(value * precision), precision);
-            }
-            
-            static from_string(str) {
-                if (str.includes('/')) {
-                    const [num, denom] = str.split('/').map(Number);
-                    return new Rational(num, denom);
-                } else {
-                    return new Rational(Number(str), 1);
-                }
-            }
-        }
-        
-        // Ingredient class from original app
-        class Ingredient {
-            constructor(item, amount) {
-                this.item = item;
-                this.amount = amount;
-                this.weight = amount * (item.weight || 0);
-            }
-        }
-        
-        // Recipe class (simplified from original app)
-        class Recipe {
-            constructor(key, name, category, location, ingredients, products, weight, cost, pays = 0, instructions = "") {
-                this.key = key;
-                this.name = name;
-                this.category = category;
-                this.location = location;
-                this.ingredients = ingredients;
-                this.products = products;
-                this.weight = weight;
-                this.cost = cost;
-                this.pays = pays;
-                this.instructions = instructions;
-            }
-            
-            calculateTotalWeight() {
-                let totalWeight = 0;
-                for (const ingredient of this.ingredients) {
-                    const itemData = appState.items[ingredient[0]] || { weight: 0 };
-                    totalWeight += (itemData.weight * ingredient[1]) / 100;
-                }
-                return totalWeight;
-            }
-        }
-
         // App State
         const appState = {
             recipes: {},
@@ -552,6 +445,7 @@
             strength: 10,
             favorites: [],
             gameData: {}, // Raw data received from game
+            lastDataUpdate: 0, // Timestamp of last data update
             capacity: {
                 strength: 10,
                 strengthMultiplier: 10, // 10kg per level
@@ -570,10 +464,10 @@
                 showMissing: true,
                 refreshInterval: 10,
                 favoritesOnly: false
-            }
+            },
+            version: "1.1.0" // App version for tracking updates
         };
-
-        // DOM Elements
+	// DOM Elements
         const menuContainer = document.getElementById('menuContainer');
         const resizeHandle = document.getElementById('resizeHandle');
         const menuHeader = document.querySelector('.menu-header');
@@ -597,12 +491,13 @@
         const inventoryProgressDisplay = document.getElementById('inventory-progress');
         const refreshInventoryBtn = document.getElementById('refresh-inventory');
         const strengthSetting = document.getElementById('strength-setting');
-        const maxInventoryWeight = document.getElementById('max-inventory-weight');
+        const inventoryCapacity = document.getElementById('inventory-capacity');
         const showMissingSetting = document.getElementById('show-missing');
         const refreshIntervalSetting = document.getElementById('refresh-interval');
         const favoritesOnlySetting = document.getElementById('favorites-only');
         const saveSettingsBtn = document.getElementById('save-settings');
         const clearFavoritesBtn = document.getElementById('clear-favorites');
+        const statusMessage = document.getElementById('status-message');
 
         // Initialize recipe database with a smaller subset of the original data
         appState.recipes = {
@@ -815,124 +710,38 @@
             "liquid-water": { weight: 100, stack_size: 90 },
             "rebar": { weight: 45, stack_size: 200 },
             "scrap-acid": { weight: 5, stack_size: 1800 }
-        };
-
-        // Mock inventory data for testing - this would be replaced with actual game data
-        appState.inventory = {
-            "refined-zinc": 5,
-            "refined-solder": 10,
-            "scrap-acid": 20,
-            "scrap-aluminum": 8,
-            "scrap-tin": 4,
-            "scrap-copper": 12,
-            "refined-sand": 30,
-            "tcargodust": 50,
-            "refined-flint": 25,
-            "scrap-plastic": 40
-        };
-
-        // Load settings from localStorage
-        function loadSettings() {
-            const savedSettings = localStorage.getItem('blueprintBuddy_settings');
-            if (savedSettings) {
-                const parsedSettings = JSON.parse(savedSettings);
-                appState.settings = { ...appState.settings, ...parsedSettings };
-                
-                // Update UI with loaded settings
-                showMissingSetting.checked = appState.settings.showMissing;
-                refreshIntervalSetting.value = appState.settings.refreshInterval;
-                favoritesOnlySetting.checked = appState.settings.favoritesOnly;
-            }
-            
-            // Load capacity settings
-            loadCapacitySettings();
-            
-            // Load favorites
-            const savedFavorites = localStorage.getItem('blueprintBuddy_favorites');
-            if (savedFavorites) {
-                appState.favorites = JSON.parse(savedFavorites);
-            }
-        }
-
-        // Save settings to localStorage
-        function saveSettings() {
-            const settingsToSave = {
-                showMissing: showMissingSetting.checked,
-                refreshInterval: parseInt(refreshIntervalSetting.value) || 0,
-                favoritesOnly: favoritesOnlySetting.checked
-            };
-            
-            localStorage.setItem('blueprintBuddy_settings', JSON.stringify(settingsToSave));
-            appState.settings = settingsToSave;
-            
-            // Save capacity settings
-            saveCapacitySettings();
-            
-            populateRecipeOptions(); // Refresh recipe list in case favorites-only changed
-            
-            // Update UI to reflect saved settings
-            const selectedRecipe = recipeSelect.value;
-            if (selectedRecipe) {
-                displayRecipeDetails(selectedRecipe);
-            }
-            
-            // Update refresh interval if it changed
-            if (refreshIntervalID) {
-                clearInterval(refreshIntervalID);
-                refreshIntervalID = null;
-            }
-            
-            if (appState.settings.refreshInterval > 0) {
-                refreshIntervalID = setInterval(function() {
-                    requestGameData(['inventory', 'weight', 'max_weight']);
-                }, appState.settings.refreshInterval * 1000);
-            }
-        }
-
-        // Save favorites to localStorage
-        function saveFavorites() {
-            localStorage.setItem('blueprintBuddy_favorites', JSON.stringify(appState.favorites));
-        }
-
-        // Update capacity calculation based on all settings
-        function calculateTotalCapacity() {
-            // Calculate strength-based capacity
-            const strengthCapacity = appState.capacity.strength * appState.capacity.strengthMultiplier;
-            
-            // Calculate multipliers from perks and bonuses
-            let multiplier = 1;
-            if (appState.capacity.premium) {
-                multiplier += appState.capacity.premiumMultiplier;
-            }
-            if (appState.capacity.postOp) {
-                multiplier += appState.capacity.postOpMultiplier;
-            }
-            if (appState.capacity.milk) {
-                multiplier += appState.capacity.milkMultiplier;
-            }
-            
-            // Add up all capacities with multipliers
-            const baseCapacity = strengthCapacity * multiplier;
-            const truckCapacity = appState.capacity.truckCapacity;
-            const trailerCapacity = appState.capacity.trailerCapacity;
-            
-            // Calculate total capacity
-            const totalCapacity = baseCapacity + truckCapacity + trailerCapacity;
-            
-            // Update UI
-            document.getElementById('total-capacity').textContent = Math.round(totalCapacity);
-            
-            return totalCapacity;
-        }
-        
-        // Update max weight based on capacity settings
+        }; "Filtering Plant",
+                time: 1,
+                ingredients: [
+                    ["cement", 5],
+                    ["liquid-water", 1]
+                ],
+                products: [["concrete", 1]],
+                weight: 160,
+                cost: 15000,
+                instructions: "Mix cement with water at the filtering plant to create concrete."
+            },
+            "Copper Wire": {
+                key_name: "copperwire",
+                category: "ls-factory",
+                location: "LS Factory",
+                time: 1,
+                ingredients: [
+                    ["refined-planks", 1],
+                    ["refined-copper", 4]
+                ],
+                products: [["copperwire", 2]],
+                weight: 40,
+                cost: 5000,
+                instructions: "Wind refined copper around wooden spools to create
+// Update max weight based on capacity settings
         function updateMaxWeight() {
             // Calculate total capacity
             appState.maxWeight = calculateTotalCapacity();
             
             // Update UI elements
             maxWeightDisplay.textContent = appState.maxWeight;
-            maxInventoryWeight.textContent = appState.maxWeight;
+            inventoryCapacity.textContent = appState.maxWeight;
             
             // Update progress bar
             updateInventoryWeight();
@@ -942,36 +751,85 @@
         function autoDetectSettings() {
             if (!appState.capacity.autoDetect) return;
             
+            let settingsChanged = false;
+            
             // Try to detect strength from game data
+            // First check for direct strength value
             if (appState.gameData.strength) {
                 const strength = parseInt(appState.gameData.strength);
                 if (!isNaN(strength) && strength > 0) {
+                    if (appState.capacity.strength !== strength) {
+                        appState.capacity.strength = strength;
+                        document.getElementById('strength-setting').value = strength;
+                        settingsChanged = true;
+                    }
+                }
+            } 
+            // Then check for calculated strength from experience
+            else if (appState.gameData.calculatedStrength) {
+                const strength = appState.gameData.calculatedStrength;
+                if (appState.capacity.strength !== strength) {
                     appState.capacity.strength = strength;
                     document.getElementById('strength-setting').value = strength;
+                    settingsChanged = true;
                 }
             }
             
             // Try to detect vehicle type
-            if (appState.gameData.vehicleName) {
-                const vehicleName = appState.gameData.vehicleName;
-                if (vehicleName.includes('MK15')) {
-                    appState.capacity.truckCapacity = 6000;
-                    document.getElementById('truck-setting').value = "6000";
+            if (appState.gameData.vehicle) {
+                const vehicleType = appState.gameData.vehicle;
+                if (vehicleType.includes('mk15')) {
+                    if (appState.capacity.truckCapacity !== 6000) {
+                        appState.capacity.truckCapacity = 6000;
+                        document.getElementById('truck-setting').value = "6000";
+                        settingsChanged = true;
+                    }
+                } else {
+                    if (appState.capacity.truckCapacity !== 0) {
+                        appState.capacity.truckCapacity = 0;
+                        document.getElementById('truck-setting').value = "0";
+                        settingsChanged = true;
+                    }
                 }
             }
             
             // Try to detect trailer type from trailer data
             if (appState.gameData.trailer) {
-                const trailerType = appState.gameData.trailer;
-                // This would need to map trailer names to capacity values
-                // For now, we'll leave it to manual setting
+                const trailer = appState.gameData.trailer.toLowerCase();
+                
+                // Map trailer types to capacity values
+                let trailerCapacity = 9000; // Default to MK14
+                
+                if (trailer.includes('mk1trailer')) trailerCapacity = 400;
+                else if (trailer.includes('mk2trailer')) trailerCapacity = 475;
+                else if (trailer.includes('mk3trailer')) trailerCapacity = 600;
+                else if (trailer.includes('mk4trailer')) trailerCapacity = 775;
+                else if (trailer.includes('mk5trailer')) trailerCapacity = 1000;
+                else if (trailer.includes('mk6trailer')) trailerCapacity = 1500;
+                else if (trailer.includes('mk7trailer')) trailerCapacity = 2200;
+                else if (trailer.includes('mk8trailer')) trailerCapacity = 2500;
+                else if (trailer.includes('mk9trailer')) trailerCapacity = 2750;
+                else if (trailer.includes('mk10trailer')) trailerCapacity = 3000;
+                else if (trailer.includes('mk11trailer')) trailerCapacity = 3500;
+                else if (trailer.includes('mk12trailer')) trailerCapacity = 5000;
+                else if (trailer.includes('mk13trailer')) trailerCapacity = 8500;
+                else if (trailer.includes('mk14trailer')) trailerCapacity = 9000;
+                
+                if (appState.capacity.trailerCapacity !== trailerCapacity) {
+                    appState.capacity.trailerCapacity = trailerCapacity;
+                    document.getElementById('trailer-setting').value = trailerCapacity.toString();
+                    settingsChanged = true;
+                }
             }
             
-            // Try to detect perks (this may require specific game data fields)
-            // For now, we'll rely on manual settings for these
-            
-            // Update capacity calculation
-            updateMaxWeight();
+            // If settings changed, update capacity calculation
+            if (settingsChanged) {
+                updateMaxWeight();
+                
+                // Update status message
+                statusMessage.textContent = 'Auto-detected settings updated';
+                statusMessage.style.backgroundColor = 'rgba(41, 128, 185, 0.5)'; // Blue
+            }
         }
         
         // Load capacity settings from localStorage
@@ -1217,38 +1075,29 @@
         // Get inventory data from game
         function getInventoryData() {
             try {
+                // Update status indicator
+                statusMessage.textContent = 'Requesting inventory data...';
+                statusMessage.style.backgroundColor = 'rgba(243, 156, 18, 0.5)'; // Orange
+                
                 // Request inventory data from game
-                sendCommand({ type: 'getNamedData', keys: ['inventory', 'weight', 'max_weight'] });
+                sendCommand({ type: 'getNamedData', keys: ['inventory', 'weight', 'max_weight', 'vehicle', 'trailer', 'strength', 'exp_trucker_strength'] });
                 
-                // For demonstration, we'll just update with mock data
-                // In a real implementation, you would parse the response from the game
-                
-                // Simulating inventory changes
-                const randomItems = Object.keys(appState.items);
-                const randomItem = randomItems[Math.floor(Math.random() * randomItems.length)];
-                const randomAmount = Math.floor(Math.random() * 10) + 1;
-                
-                if (appState.inventory[randomItem]) {
-                    appState.inventory[randomItem] += randomAmount;
-                } else {
-                    appState.inventory[randomItem] = randomAmount;
-                }
-                
-                updateInventoryWeight();
-                displayInventory();
-                
-                // If a recipe is selected, refresh its display to show updated inventory status
-                const selectedRecipe = recipeSelect.value;
-                if (selectedRecipe) {
-                    displayRecipeDetails(selectedRecipe);
-                }
+                // We'll rely on the message event listener to process the response
+                // Data will be handled by processGameData() function
             } catch (error) {
                 console.error('Failed to get inventory data:', error);
+                statusMessage.textContent = 'Error requesting data: ' + error.message;
+                statusMessage.style.backgroundColor = 'rgba(231, 76, 60, 0.5)'; // Red
             }
         }
 
         // Process game data received from the game client
         function processGameData(data) {
+            console.log('Received game data:', data);
+            
+            // Update status indicator
+            statusMessage.textContent = 'Data received, processing...';
+            
             // Store raw game data
             for (const [key, value] of Object.entries(data)) {
                 appState.gameData[key] = value;
@@ -1265,35 +1114,76 @@
                     if (selectedRecipe) {
                         displayRecipeDetails(selectedRecipe);
                     }
+                    
+                    // Show last update time
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString();
+                    statusMessage.textContent = `Inventory updated at ${timeStr}`;
+                    statusMessage.style.backgroundColor = 'rgba(46, 204, 113, 0.5)'; // Green
                 } catch (e) {
                     console.error('Failed to parse inventory data:', e);
+                    statusMessage.textContent = 'Error parsing inventory data: ' + e.message;
+                    statusMessage.style.backgroundColor = 'rgba(231, 76, 60, 0.5)'; // Red
                 }
             }
             
             // Handle weight and capacity data
-            if (data.weight) {
+            if (data.weight !== undefined) {
                 appState.weight = parseInt(data.weight);
                 currentWeightDisplay.textContent = appState.weight;
             }
             
-            if (data.max_weight) {
-                // We'll use our own calculation for max weight
-                // appState.maxWeight = parseInt(data.max_weight);
-                // maxWeightDisplay.textContent = appState.maxWeight;
-                // maxInventoryWeight.textContent = appState.maxWeight;
+            if (data.max_weight !== undefined) {
+                // We'll store the game's max weight, but still use our calculation
+                appState.gameData.maxWeight = parseInt(data.max_weight);
+                
+                // If we're not using calculated weights, use the game value
+                if (!appState.capacity.autoDetect) {
+                    appState.maxWeight = appState.gameData.maxWeight;
+                    maxWeightDisplay.textContent = appState.maxWeight;
+                    inventoryCapacity.textContent = appState.maxWeight;
+                }
+            }
+            
+            // Check for strength skill data
+            if (data.exp_trucker_strength !== undefined) {
+                // Calculate strength level from experience
+                // level = (math.sqrt(1 + 8 * experience / 5) - 1) / 2
+                const exp = parseFloat(data.exp_trucker_strength);
+                if (!isNaN(exp)) {
+                    const level = Math.floor((Math.sqrt(1 + 8 * exp / 5) - 1) / 2);
+                    appState.gameData.calculatedStrength = level;
+                    console.log('Calculated strength level:', level);
+                }
+            }
+            
+            // Check for strength directly
+            if (data.strength !== undefined) {
+                const strength = parseInt(data.strength);
+                if (!isNaN(strength)) {
+                    appState.gameData.strength = strength;
+                }
+            }
+            
+            // Check for vehicle data to determine capacity
+            if (data.vehicle !== undefined) {
+                appState.gameData.vehicle = data.vehicle;
+            }
+            
+            if (data.trailer !== undefined) {
+                appState.gameData.trailer = data.trailer;
             }
             
             // Auto-detect settings if enabled
-            autoDetectSettings();
+            if (appState.capacity.autoDetect) {
+                autoDetectSettings();
+            }
             
             // Update UI elements
             updateInventoryWeight();
             
-            // You could add additional data handling for other game data here
-            // For example:
-            // - Handling vehicle data (trunk/trailer capacity)
-            // - Player position data (for showing nearby recipe locations)
-            // - Player job info
+            // Set timestamp for last data update
+            appState.lastDataUpdate = new Date().getTime();
         }
         
         // Request specific data from the game client
@@ -1307,6 +1197,11 @@
 
         // Initialize app
         function initApp() {
+            console.log('Initializing BlueprintBuddy...');
+            
+            // Setup status indicator
+            statusMessage.textContent = 'Initializing BlueprintBuddy...';
+            
             // Movable window functionality
             let isDragging = false;
             let startX, startY, startLeft, startTop;
@@ -1357,9 +1252,9 @@
                 let newWidth = startWidth + (e.clientX - startX);
                 let newHeight = startHeight + (e.clientY - startY);
                 
-                // Constrain to min and max sizes
+                // Constrain to min and max sizes (increased max height to 750px)
                 newWidth = Math.max(200, Math.min(600, newWidth));
-                newHeight = Math.max(150, Math.min(500, newHeight));
+                newHeight = Math.max(150, Math.min(750, newHeight));
                 
                 menuContainer.style.width = `${newWidth}px`;
                 menuContainer.style.height = `${newHeight}px`;
@@ -1385,6 +1280,7 @@
 
             // Close button functionality
             closeBtn.addEventListener('click', function() {
+                statusMessage.textContent = 'Closing application...';
                 sendCommand({ type: 'close' });
             });
 
@@ -1408,7 +1304,7 @@
 
             // Inventory functionality
             refreshInventoryBtn.addEventListener('click', function() {
-                requestGameData(['inventory', 'weight', 'max_weight']);
+                requestGameData(['inventory', 'weight', 'max_weight', 'vehicle', 'trailer', 'strength', 'exp_trucker_strength']);
             });
             inventorySearch.addEventListener('input', displayInventory);
 
@@ -1423,12 +1319,31 @@
                 }
             });
 
+            // Set up auto-refresh if interval > 0
+            let refreshIntervalID = null;
+            
+            function setupAutoRefresh() {
+                if (refreshIntervalID) {
+                    clearInterval(refreshIntervalID);
+                    refreshIntervalID = null;
+                }
+                
+                if (appState.settings.refreshInterval > 0) {
+                    refreshIntervalID = setInterval(function() {
+                        requestGameData(['inventory', 'weight', 'max_weight', 'vehicle', 'trailer', 'strength', 'exp_trucker_strength']);
+                    }, appState.settings.refreshInterval * 1000);
+                    
+                    console.log(`Auto-refresh set up for every ${appState.settings.refreshInterval} seconds`);
+                }
+            }
+
             // Initial setup
             loadSettings();
             populateRecipeOptions();
             displayInventory();
             updateInventoryWeight();
             calculateTotalCapacity(); // Calculate initial capacity
+            setupAutoRefresh();
             
             // Add event listeners for capacity settings
             document.getElementById('strength-setting').addEventListener('input', calculateTotalCapacity);
@@ -1446,14 +1361,6 @@
             // Position in center of screen initially
             menuContainer.style.left = `${(window.innerWidth - menuContainer.offsetWidth) / 2}px`;
             menuContainer.style.top = `${(window.innerHeight - menuContainer.offsetHeight) / 2}px`;
-            
-            // Set up auto-refresh if interval > 0
-            let refreshIntervalID = null;
-            if (appState.settings.refreshInterval > 0) {
-                refreshIntervalID = setInterval(function() {
-                    requestGameData(['inventory', 'weight', 'max_weight']);
-                }, appState.settings.refreshInterval * 1000);
-            }
             
             // Keyboard event to ensure game controls work
             document.addEventListener('keydown', function(e) {
@@ -1474,7 +1381,11 @@
             });
             
             // Request initial data from game client
-            requestGameData(['inventory', 'weight', 'max_weight', 'strength']);
+            requestGameData(['inventory', 'weight', 'max_weight', 'strength', 'vehicle', 'trailer', 'exp_trucker_strength']);
+            
+            // Notify that we're ready
+            statusMessage.textContent = 'BlueprintBuddy ready and waiting for game data';
+            statusMessage.style.backgroundColor = 'rgba(22, 160, 133, 0.5)'; // Teal
         }
 
         // Initialize on page load
