@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Recipe App</title>
+    <style>
+      /* Ensure the HTML and Body tags have a transparent background */
+      html, body {
+        background-color: transparent !important; /* Make sure the background is transparent */
+        margin: 0;
+        padding: 0;
+        height: 100%; /* Take up the entire height of the window */
+        overflow: hidden; /* Prevent scrolling */
+      }
+
+      /* App container (if you're using one) also needs to have a transparent background */
+      #app-container {
+        background-color: transparent !important;
+        height: 100%;
+        width: 100%;
+        color: white; /* Optional: set text color to white for visibility */
+        font-family: Arial, sans-serif; /* Optional: set font */
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-container">
+      <!-- Your app content goes here -->
+      <h1>Recipe App</h1>
+      <p>Select a recipe to view its details.</p>
+      <!-- Example recipe list -->
+      <ul>
+        <li>Recipe 1</li>
+        <li>Recipe 2</li>
+        <li>Recipe 3</li>
+      </ul>
+    </div>
+  </body>
+</html>
