@@ -1,0 +1,2258 @@
+[
+  {
+    "transformer_id": "trucking_logging_camp",
+    "name": "Collect Logs",
+    "description": "Collect Logs from the Logging Camp",
+    "in_money": 7500,
+    "out_money": 0,
+    "reagents": [],
+    "products": [
+      {
+        "item": "tcargologs",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_sawmill",
+    "name": "Mill Planks x1",
+    "description": "Make high quality planks out of the logs",
+    "in_money": 500,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "tcargologs",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_planks",
+        "amount": 1
+      },
+      {
+        "item": "tcargodust",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_sawmill",
+    "name": "Sawdust Filler Exploit",
+    "description": "Grind a bulk of 5 Logs into Sawdust",
+    "in_money": 2500,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "tcargologs",
+        "amount": 5
+      },
+      {
+        "item": "refined_sand",
+        "amount": 10
+      }
+    ],
+    "products": [
+      {
+        "item": "tcargodust",
+        "amount": 100
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_sawmill",
+    "name": "Chipboard Planks",
+    "description": "Make high quality planks out of the bulk of 5 logs",
+    "in_money": 2500,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "tcargologs",
+        "amount": 5
+      },
+      {
+        "item": "tcargodust",
+        "amount": 30
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_planks",
+        "amount": 15
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_sawmill",
+    "name": "Grind Sawdust x1",
+    "description": "Grind Logs into Sawdust",
+    "in_money": 500,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "tcargologs",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "tcargodust",
+        "amount": 10
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_mckenzie_export",
+    "name": "Export Scrap Plastic",
+    "description": "Export the scrap plastic",
+    "in_money": 0,
+    "out_money": 3600,
+    "reagents": [
+      {
+        "item": "scrap_plastic",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_mckenzie_export",
+    "name": "Export Cardboard",
+    "description": "Export Cardboard",
+    "in_money": 0,
+    "out_money": 60000,
+    "reagents": [
+      {
+        "item": "crafted_cardboard",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_mckenzie_export",
+    "name": "Export Flint",
+    "description": "Export the flint",
+    "in_money": 0,
+    "out_money": 4250,
+    "reagents": [
+      {
+        "item": "refined_flint",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_harmony_shopping_center",
+    "name": "Deliver Food Shipment",
+    "description": "Deliver Food Shipment",
+    "in_money": 0,
+    "out_money": 1200,
+    "reagents": [
+      {
+        "item": "fridge_store_delivery",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_jewelry_store",
+    "name": "Deliver Raw Emeralds",
+    "description": "Deliver raw emeralds",
+    "in_money": 0,
+    "out_money": 25000,
+    "reagents": [
+      {
+        "item": "scrap_emerald",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_jewelry_store",
+    "name": "Deliver Refined Gold",
+    "description": "Deliver Gold.",
+    "in_money": 0,
+    "out_money": 31000,
+    "reagents": [
+      {
+        "item": "refined_gold",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_jewelry_store",
+    "name": "Deliver Jewelry",
+    "description": "Deliver Jewelry.",
+    "in_money": 0,
+    "out_money": 95000,
+    "reagents": [
+      {
+        "item": "crafted_jewelry",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_ls_oil_pumping_station",
+    "name": "Extract Crude Oil",
+    "description": "Extract Crude Oil",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [],
+    "products": [
+      {
+        "item": "petrochem_oil",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_sandstone_collector",
+    "name": "Scrap Lead",
+    "description": "Trade Sandstone to Scrap Lead",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mining_credit",
+        "amount": 3
+      }
+    ],
+    "products": [
+      {
+        "item": "scrap_lead",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_sandstone_collector",
+    "name": "Scrap Mercury",
+    "description": "Trade Sandstone to Scrap Mercury",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mining_credit",
+        "amount": 3
+      }
+    ],
+    "products": [
+      {
+        "item": "scrap_mercury",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_sandstone_collector",
+    "name": "Scrap Aluminum",
+    "description": "Trade Sandstone to Scrap Aluminum",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mining_credit",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "scrap_aluminum",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_sandstone_collector",
+    "name": "Sand",
+    "description": "Trade Sandstone to Sand",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mining_credit",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_sand",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_sandstone_collector",
+    "name": "Flint",
+    "description": "Trade Sandstone to Flint",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mining_credit",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_flint",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_sandstone_collector",
+    "name": "Raw Emeralds",
+    "description": "Trade Sandstone to Raw Emeralds",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mining_credit",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "scrap_emerald",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_sandstone_collector",
+    "name": "Scrap Copper",
+    "description": "Trade Sandstone to Scrap Copper",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mining_credit",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "scrap_copper",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_sandstone_collector",
+    "name": "Titanium Ore",
+    "description": "Trade Sandstone to Titanium Ore",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mining_credit",
+        "amount": 5
+      }
+    ],
+    "products": [
+      {
+        "item": "military_titanium_ore",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_sandstone_collector",
+    "name": "Scrap Tin",
+    "description": "Trade Sandstone to Scrap Tin",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mining_credit",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "scrap_tin",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_sandstone_collector",
+    "name": "Raw Ore Mix",
+    "description": "Trade Sandstone to Raw Ore Mix",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mining_credit",
+        "amount": 3
+      }
+    ],
+    "products": [
+      {
+        "item": "scrap_ore",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_sandstone_collector",
+    "name": "<span>Sell Directly</span>",
+    "description": "Sell the Sandstone to the collector",
+    "in_money": 0,
+    "out_money": 7500,
+    "reagents": [
+      {
+        "item": "mining_credit",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_military_workshop",
+    "name": "Deliver Titanium",
+    "description": "Deliver Titanium",
+    "in_money": 0,
+    "out_money": 75000,
+    "reagents": [
+      {
+        "item": "military_titanium",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_military_workshop",
+    "name": "Create Explosives",
+    "description": "Create Explosives",
+    "in_money": 9500,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "petrochem_sulfur",
+        "amount": 10
+      },
+      {
+        "item": "petrochem_kerosene",
+        "amount": 8
+      }
+    ],
+    "products": [
+      {
+        "item": "military_explosives",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_vehicle_parts",
+    "name": "Temporary Repair Shop",
+    "description": "Temporary Repair Shop",
+    "in_money": 1500000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "pucargosmall",
+        "amount": 2
+      },
+      {
+        "item": "mechanicals_wheels",
+        "amount": 2
+      },
+      {
+        "item": "military_titanium",
+        "amount": 2
+      },
+      {
+        "item": "mechanicals_chassis",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "repair_shop",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_vehicle_parts",
+    "name": "Chassis",
+    "description": "Chassis",
+    "in_money": 100000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "refined_amalgam",
+        "amount": 15
+      }
+    ],
+    "products": [
+      {
+        "item": "mechanicals_chassis",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_vehicle_parts",
+    "name": "Traction Battery",
+    "description": "Traction Battery",
+    "in_money": 120000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mechanicals_battery",
+        "amount": 6
+      }
+    ],
+    "products": [
+      {
+        "item": "mechanicals_battery_evb",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_vehicle_parts",
+    "name": "Car Battery",
+    "description": "Car Battery",
+    "in_money": 35000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "crafted_batteries",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "mechanicals_battery",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_vehicle_parts",
+    "name": "Wheels",
+    "description": "Wheels",
+    "in_money": 20000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mechanicals_rubber",
+        "amount": 10
+      },
+      {
+        "item": "refined_aluminum",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "mechanicals_wheels",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_vehicle_parts",
+    "name": "Vehicle Framework",
+    "description": "Vehicle Framework",
+    "in_money": 250000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "refined_amalgam",
+        "amount": 25
+      }
+    ],
+    "products": [
+      {
+        "item": "mechanicals_vehicle_framework",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_gsd_gas_pumping_station",
+    "name": "Extract Raw Gas",
+    "description": "Extract Raw Gas",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [],
+    "products": [
+      {
+        "item": "petrochem_gas",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_deep_quarry",
+    "name": "Recycle Ore Mix",
+    "description": "Recycle Ore Mix",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "scrap_ore",
+        "amount": 15
+      },
+      {
+        "item": "military_explosives",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_sand",
+        "amount": 90
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_deep_quarry",
+    "name": "Use Explosives",
+    "description": "Use Explosives",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "military_explosives",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_sand",
+        "amount": 20
+      },
+      {
+        "item": "scrap_gravel",
+        "amount": 30
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_deep_quarry",
+    "name": "Gravel Pulverizing",
+    "description": "Gravel Pulverizing",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "military_explosives",
+        "amount": 1
+      },
+      {
+        "item": "scrap_gravel",
+        "amount": 20
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_sand",
+        "amount": 100
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_bristols_fuel_storage",
+    "name": "Sell Diesel",
+    "description": "Sell Diesel",
+    "in_money": 0,
+    "out_money": 12000,
+    "reagents": [
+      {
+        "item": "petrochem_diesel",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_bristols_fuel_storage",
+    "name": "Sell Kerosene",
+    "description": "Sell Kerosene",
+    "in_money": 0,
+    "out_money": 15000,
+    "reagents": [
+      {
+        "item": "petrochem_kerosene",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_bristols_fuel_storage",
+    "name": "Sell Petrol",
+    "description": "Sell Petrol",
+    "in_money": 0,
+    "out_money": 8000,
+    "reagents": [
+      {
+        "item": "petrochem_petrol",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_clucking_bell_farms",
+    "name": "Pack Meat",
+    "description": "Pack Meat",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "meat",
+        "amount": 30
+      }
+    ],
+    "products": [
+      {
+        "item": "fridge_meat",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_clucking_bell_farms",
+    "name": "Pack Fish Meat x10",
+    "description": "Pack Fish Meat x10",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "fish_meat",
+        "amount": 1500
+      }
+    ],
+    "products": [
+      {
+        "item": "fridge_meat",
+        "amount": 10
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_clucking_bell_farms",
+    "name": "Pack Fish Meat",
+    "description": "Pack Fish Meat",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "fish_meat",
+        "amount": 150
+      }
+    ],
+    "products": [
+      {
+        "item": "fridge_meat",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_clucking_bell_farms",
+    "name": "Pack Crispy Fish Meat x10",
+    "description": "Pack Crispy Fish Meat x10",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "fish_meat",
+        "amount": 1000
+      },
+      {
+        "item": "tcargodust",
+        "amount": 20
+      }
+    ],
+    "products": [
+      {
+        "item": "fridge_meat",
+        "amount": 10
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_clucking_bell_farms",
+    "name": "Pack Meat x10",
+    "description": "Pack Meat",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "meat",
+        "amount": 300
+      }
+    ],
+    "products": [
+      {
+        "item": "fridge_meat",
+        "amount": 10
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_clucking_bell_farms",
+    "name": "Pack Crispy Meat x10",
+    "description": "Pack Crispy Meat x10",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "meat",
+        "amount": 200
+      },
+      {
+        "item": "tcargodust",
+        "amount": 20
+      }
+    ],
+    "products": [
+      {
+        "item": "fridge_meat",
+        "amount": 10
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_davis_mega_mall",
+    "name": "Sell Propane",
+    "description": "Sell Propane",
+    "in_money": 0,
+    "out_money": 10000,
+    "reagents": [
+      {
+        "item": "petrochem_propane",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_water_treatment_plant",
+    "name": "Clean Waste Water",
+    "description": "Clean Waste Water",
+    "in_money": 5000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "petrochem_waste",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "liquid_water",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_water_treatment_plant",
+    "name": "Treat Unfiltered Water",
+    "description": "Filter out the germs of that nasty water",
+    "in_money": 5000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "liquid_water_raw",
+        "amount": 1
+      },
+      {
+        "item": "scrap_acid",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "liquid_water",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_water_treatment_plant",
+    "name": "Treat Waste Water",
+    "description": "Treat Waste Water",
+    "in_money": 5000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "petrochem_waste",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "petrochem_sulfur",
+        "amount": 5
+      }
+    ]
+  },
+  {
+    "transformer_id": "house_construction_site",
+    "name": "House Construction",
+    "description": "Construct a House",
+    "in_money": 0,
+    "out_money": 2350000,
+    "reagents": [
+      {
+        "item": "crafted_copperwire",
+        "amount": 1
+      },
+      {
+        "item": "crafted_rebar",
+        "amount": 1
+      },
+      {
+        "item": "crafted_concrete",
+        "amount": 1
+      },
+      {
+        "item": "refined_planks",
+        "amount": 2
+      },
+      {
+        "item": "crafted_ceramictiles",
+        "amount": 4
+      },
+      {
+        "item": "crafted_computer",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_refinery",
+    "name": "Refine Crude Oil",
+    "description": "Refine Crude Oil",
+    "in_money": 10250,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "petrochem_oil",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "petrochem_diesel",
+        "amount": 1
+      },
+      {
+        "item": "petrochem_petrol",
+        "amount": 2
+      },
+      {
+        "item": "petrochem_kerosene",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_refinery",
+    "name": "Create Asphalt",
+    "description": "Create Asphalt",
+    "in_money": 10250,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "petrochem_oil",
+        "amount": 1
+      },
+      {
+        "item": "scrap_gravel",
+        "amount": 20
+      }
+    ],
+    "products": [
+      {
+        "item": "petrochem_asphalt",
+        "amount": 20
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_refinery",
+    "name": "Polyacrylonitrile (PAN)",
+    "description": "Polyacrylonitrile (PAN)",
+    "in_money": 10250,
+    "out_money": 0,
+    "reagents": [],
+    "products": [
+      {
+        "item": "tavi_pan",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_refinery",
+    "name": "Refine Raw Gas",
+    "description": "Refine Raw Gas",
+    "in_money": 10250,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "petrochem_gas",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "military_chemicals",
+        "amount": 2
+      },
+      {
+        "item": "petrochem_propane",
+        "amount": 2
+      },
+      {
+        "item": "petrochem_waste",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_refinery",
+    "name": "Refine Rubber",
+    "description": "Refine Rubber",
+    "in_money": 41000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "petrochem_oil",
+        "amount": 4
+      }
+    ],
+    "products": [
+      {
+        "item": "petrochem_petrol",
+        "amount": 4
+      },
+      {
+        "item": "mechanicals_rubber",
+        "amount": 4
+      },
+      {
+        "item": "petrochem_diesel",
+        "amount": 2
+      },
+      {
+        "item": "petrochem_kerosene",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_refinery",
+    "name": "Refine Diluted Fuel",
+    "description": "Refine Diluted Fuel",
+    "in_money": 10250,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "petrochem_oil",
+        "amount": 3
+      },
+      {
+        "item": "liquid_water",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "petrochem_diesel",
+        "amount": 3
+      },
+      {
+        "item": "petrochem_petrol",
+        "amount": 3
+      },
+      {
+        "item": "petrochem_kerosene",
+        "amount": 20
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_port_export",
+    "name": "Export Aluminum x1",
+    "description": "Export aluminum",
+    "in_money": 0,
+    "out_money": 8400,
+    "reagents": [
+      {
+        "item": "refined_aluminum",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_elysian_island_waste_deposit",
+    "name": "<span sort='C'></span>Exchange Copper",
+    "description": "Exchange Copper",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mining_token_copper",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "scrap_ore",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_elysian_island_waste_deposit",
+    "name": "<span sort='E'></span>Exchange Iron",
+    "description": "Exchange Iron",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mining_token_iron",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "scrap_ore",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_elysian_island_waste_deposit",
+    "name": "<span sort='A'></span>Toxic Waste",
+    "description": "Pick up Toxic Waste, bring it to a filtering facility.",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [],
+    "products": [
+      {
+        "item": "recycled_waste",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_filtering_plant",
+    "name": "Mix Concrete",
+    "description": "Mix a batch of concrete",
+    "in_money": 15000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "liquid_water",
+        "amount": 1
+      },
+      {
+        "item": "crafted_cement",
+        "amount": 5
+      }
+    ],
+    "products": [
+      {
+        "item": "crafted_concrete",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_filtering_plant",
+    "name": "Conveyor Filtering",
+    "description": "Filter by conveyor from the quarry",
+    "in_money": 30000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mining_token_copper",
+        "amount": 1
+      },
+      {
+        "item": "mining_token_iron",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "scrap_emerald",
+        "amount": 1
+      },
+      {
+        "item": "scrap_ore",
+        "amount": 3
+      },
+      {
+        "item": "scrap_gravel",
+        "amount": 10
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_filtering_plant",
+    "name": "Filter Gravel",
+    "description": "Filter materials out of the gravel.",
+    "in_money": 15000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "scrap_gravel",
+        "amount": 10
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_sand",
+        "amount": 6
+      },
+      {
+        "item": "refined_flint",
+        "amount": 4
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_filtering_plant",
+    "name": "Filter Toxic Waste",
+    "description": "Filter waste materials out of the waste.",
+    "in_money": 15000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "recycled_waste",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "scrap_mercury",
+        "amount": 2
+      },
+      {
+        "item": "scrap_lead",
+        "amount": 2
+      },
+      {
+        "item": "scrap_acid",
+        "amount": 4
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_filtering_plant",
+    "name": "Filter Quarry Rubble",
+    "description": "Filter materials out of the rubble.",
+    "in_money": 15000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "recycled_rubble",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "scrap_emerald",
+        "amount": 1
+      },
+      {
+        "item": "scrap_ore",
+        "amount": 4
+      },
+      {
+        "item": "scrap_gravel",
+        "amount": 12
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_great_chaparral_farm",
+    "name": "Pick up Vegetables",
+    "description": "Pick up Vegetables",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [],
+    "products": [
+      {
+        "item": "fridge_veggies",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_factory",
+    "name": "Create Fiberglass Spool",
+    "description": "Create spools of fiberglass",
+    "in_money": 5000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "refined_planks",
+        "amount": 1
+      },
+      {
+        "item": "refined_glass",
+        "amount": 4
+      },
+      {
+        "item": "scrap_plastic",
+        "amount": 8
+      }
+    ],
+    "products": [
+      {
+        "item": "crafted_fiberglass",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_factory",
+    "name": "Create Computer",
+    "description": "Make Computers",
+    "in_money": 5000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "crafted_circuit",
+        "amount": 1
+      },
+      {
+        "item": "crafted_batteries",
+        "amount": 1
+      },
+      {
+        "item": "scrap_gold",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "crafted_computer",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_factory",
+    "name": "Titanium Reinforcement",
+    "description": "Clean Waste Water",
+    "in_money": 5000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "military_titanium",
+        "amount": 6
+      }
+    ],
+    "products": [
+      {
+        "item": "crafted_rebar",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_factory",
+    "name": "Titanium Jewelry",
+    "description": "Combine valuable items into even more valuable jewelry.",
+    "in_money": 5000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "military_titanium",
+        "amount": 1
+      },
+      {
+        "item": "refined_gold",
+        "amount": 4
+      }
+    ],
+    "products": [
+      {
+        "item": "crafted_jewelry",
+        "amount": 4
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_factory",
+    "name": "Create Cardboard",
+    "description": "Create Cardboard",
+    "in_money": 5000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "liquid_water",
+        "amount": 1
+      },
+      {
+        "item": "tcargodust",
+        "amount": 50
+      }
+    ],
+    "products": [
+      {
+        "item": "crafted_cardboard",
+        "amount": 5
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_factory",
+    "name": "Create Copper Wire Spool",
+    "description": "Create spools of copper wire",
+    "in_money": 5000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "refined_planks",
+        "amount": 1
+      },
+      {
+        "item": "refined_copper",
+        "amount": 4
+      }
+    ],
+    "products": [
+      {
+        "item": "crafted_copperwire",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_factory",
+    "name": "Create Rebar",
+    "description": "Create a shipment of rebar",
+    "in_money": 5000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "refined_bronze",
+        "amount": 2
+      },
+      {
+        "item": "refined_amalgam",
+        "amount": 6
+      }
+    ],
+    "products": [
+      {
+        "item": "crafted_rebar",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_factory",
+    "name": "Create Batteries",
+    "description": "Combine magic with metals to store power inside.",
+    "in_money": 5000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "refined_solder",
+        "amount": 4
+      },
+      {
+        "item": "refined_zinc",
+        "amount": 2
+      },
+      {
+        "item": "scrap_acid",
+        "amount": 8
+      }
+    ],
+    "products": [
+      {
+        "item": "crafted_batteries",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_factory",
+    "name": "Create Circuit Boards",
+    "description": "Make Circuit Boards",
+    "in_money": 5000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "crafted_copperwire",
+        "amount": 1
+      },
+      {
+        "item": "refined_solder",
+        "amount": 2
+      },
+      {
+        "item": "scrap_plastic",
+        "amount": 10
+      }
+    ],
+    "products": [
+      {
+        "item": "crafted_circuit",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_factory",
+    "name": "Create Jewelry",
+    "description": "Combine valuable items into even more valuable jewelry.",
+    "in_money": 5000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "scrap_emerald",
+        "amount": 1
+      },
+      {
+        "item": "refined_gold",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "crafted_jewelry",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_recycling_center",
+    "name": "Pick up Recycled Trash",
+    "description": "Pick up Recycled Trash, bring it to the sorting facility.",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [],
+    "products": [
+      {
+        "item": "recycled_trash",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_chemical_laboratories",
+    "name": "Refine Chemicals",
+    "description": "Refine Chemicals",
+    "in_money": 2500,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "military_chemicals",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "scrap_acid",
+        "amount": 4
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_chemical_laboratories",
+    "name": "Pick up Toxic Waste",
+    "description": "Pick up Toxic Waste, bring it to a filtering facility.",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [],
+    "products": [
+      {
+        "item": "recycled_waste",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_foundry",
+    "name": "Refine Titanium x1",
+    "description": "Refine Titanium",
+    "in_money": 1000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "military_titanium_ore",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "military_titanium",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_foundry",
+    "name": "Ceramic Tiles",
+    "description": "Make Ceramic Tiles",
+    "in_money": 1000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "refined_flint",
+        "amount": 10
+      },
+      {
+        "item": "refined_sand",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "crafted_ceramictiles",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_foundry",
+    "name": "Refine Aluminum x1",
+    "description": "Refine scrap aluminum into refined aluminum",
+    "in_money": 1000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "scrap_aluminum",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_aluminum",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_foundry",
+    "name": "Refine Tin x1",
+    "description": "Refine scrap tin into refined tin",
+    "in_money": 1000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "scrap_tin",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_tin",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_foundry",
+    "name": "Substitute Gold",
+    "description": "Substitute Gold",
+    "in_money": 1000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "petrochem_sulfur",
+        "amount": 10
+      },
+      {
+        "item": "refined_bronze",
+        "amount": 25
+      },
+      {
+        "item": "petrochem_petrol",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "scrap_gold",
+        "amount": 40
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_foundry",
+    "name": "Refine Amalgam",
+    "description": "A valuable alloy made from mercury and tin",
+    "in_money": 1000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "refined_tin",
+        "amount": 2
+      },
+      {
+        "item": "scrap_mercury",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_amalgam",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_foundry",
+    "name": "Refine Raw Ore Mix x1",
+    "description": "Smelt down and separate different metals from the raw ore mix",
+    "in_money": 1000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "scrap_ore",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_zinc",
+        "amount": 1
+      },
+      {
+        "item": "refined_copper",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_foundry",
+    "name": "Refine Copper x1",
+    "description": "Refine scrap copper into refined copper",
+    "in_money": 1000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "scrap_copper",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_copper",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_foundry",
+    "name": "Refine Glass x1",
+    "description": "Create glass out of that rich sand",
+    "in_money": 1000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "refined_sand",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_glass",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_foundry",
+    "name": "Hardened Steel",
+    "description": "Hardened Steel",
+    "in_money": 1000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "military_titanium",
+        "amount": 1
+      },
+      {
+        "item": "mining_token_iron",
+        "amount": 5
+      }
+    ],
+    "products": [
+      {
+        "item": "tavi_hardened_steel",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_foundry",
+    "name": "Copper Alloy",
+    "description": "Copper Alloy",
+    "in_money": 10000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "scrap_ore",
+        "amount": 20
+      },
+      {
+        "item": "petrochem_sulfur",
+        "amount": 10
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_copper",
+        "amount": 20
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_foundry",
+    "name": "Refine Solder",
+    "description": "Mix aluminum and lead to make solder",
+    "in_money": 1000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "scrap_lead",
+        "amount": 2
+      },
+      {
+        "item": "refined_aluminum",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_solder",
+        "amount": 8
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_foundry",
+    "name": "Refine Bronze Alloy x1",
+    "description": "Mix multiple metals into bronze alloy",
+    "in_money": 1000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "scrap_tin",
+        "amount": 1
+      },
+      {
+        "item": "scrap_aluminum",
+        "amount": 1
+      },
+      {
+        "item": "scrap_copper",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_bronze",
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_ls_foundry",
+    "name": "Zinc Alloy",
+    "description": "Zinc Alloy",
+    "in_money": 10000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "scrap_ore",
+        "amount": 20
+      },
+      {
+        "item": "petrochem_propane",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "refined_zinc",
+        "amount": 20
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_mineral_mine",
+    "name": "<span></span>Use Explosives",
+    "description": "Use Explosives",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "military_explosives",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "military_titanium_ore",
+        "amount": 4
+      },
+      {
+        "item": "scrap_emerald",
+        "amount": 10
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_mineral_mine",
+    "name": "Exchange Copper Ore",
+    "description": "Exchange Copper Ore",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mining_copper",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "mining_token_copper",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_mineral_mine",
+    "name": "Exchange Iron Ore",
+    "description": "Exchange Iron Ore",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "mining_iron",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "mining_token_iron",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_fridgit_co.",
+    "name": "Create Vegetables Shipment",
+    "description": "Veggies to Food Shipment",
+    "in_money": 2500,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "fridge_veggies",
+        "amount": 4
+      }
+    ],
+    "products": [
+      {
+        "item": "fridge_store_delivery",
+        "amount": 5
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_fridgit_co.",
+    "name": "Create Dairy Shipment",
+    "description": "Dairy to Food Shipment",
+    "in_money": 2500,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "fridge_dairy",
+        "amount": 4
+      }
+    ],
+    "products": [
+      {
+        "item": "fridge_store_delivery",
+        "amount": 5
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_fridgit_co.",
+    "name": "Create Meat Shipment",
+    "description": "Meat to Food Shipment",
+    "in_money": 2500,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "fridge_meat",
+        "amount": 4
+      }
+    ],
+    "products": [
+      {
+        "item": "fridge_store_delivery",
+        "amount": 5
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_fridgit_co.",
+    "name": "Create Airline Meal",
+    "description": "Create Airline Meal",
+    "in_money": 2500,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "fridge_meat",
+        "amount": 1
+      },
+      {
+        "item": "fridge_veggies",
+        "amount": 1
+      },
+      {
+        "item": "fridge_dairy",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "fridge_airline_meal",
+        "amount": 4
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_lsia_shipments",
+    "name": "Deliver Airline Meal",
+    "description": "Deliver Airline Meal",
+    "in_money": 0,
+    "out_money": 6500,
+    "reagents": [
+      {
+        "item": "fridge_airline_meal",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_electronics_store",
+    "name": "<span sort='A'></span>Pick up Recycled Electronics",
+    "description": "Pick up Recycled Electronics, bring it to the sorting facility.",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [],
+    "products": [
+      {
+        "item": "recycled_electronics",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_electronics_store",
+    "name": "<span sort='A'></span>Pick up Recycled Electronics",
+    "description": "",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_sorting_facility",
+    "name": "Sort Recycled Electronics",
+    "description": "Break down your recycled components",
+    "in_money": 25000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "recycled_electronics",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "scrap_gold",
+        "amount": 1
+      },
+      {
+        "item": "scrap_copper",
+        "amount": 8
+      },
+      {
+        "item": "scrap_plastic",
+        "amount": 12
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_sorting_facility",
+    "name": "Sort Recycled Trash",
+    "description": "Break down your recycled components",
+    "in_money": 25000,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "recycled_trash",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "scrap_tin",
+        "amount": 4
+      },
+      {
+        "item": "scrap_aluminum",
+        "amount": 4
+      },
+      {
+        "item": "scrap_plastic",
+        "amount": 8
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_alta_construction_site",
+    "name": "Deliver Rebar",
+    "description": "Deliver Rebar to the construction site",
+    "in_money": 0,
+    "out_money": 230000,
+    "reagents": [
+      {
+        "item": "crafted_rebar",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_alta_construction_site",
+    "name": "Deliver Asphalt Concrete",
+    "description": "Deliver Asphalt Concrete",
+    "in_money": 0,
+    "out_money": 25000,
+    "reagents": [
+      {
+        "item": "petrochem_asphalt",
+        "amount": 5
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_alta_construction_site",
+    "name": "Deliver Concrete",
+    "description": "Deliver Concrete to the construction site",
+    "in_money": 0,
+    "out_money": 800000,
+    "reagents": [
+      {
+        "item": "crafted_concrete",
+        "amount": 1
+      }
+    ],
+    "products": []
+  },
+  {
+    "transformer_id": "trucking_quarry",
+    "name": "Create Cement",
+    "description": "Mix together a cement mix",
+    "in_money": 1500,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "refined_sand",
+        "amount": 5
+      },
+      {
+        "item": "tcargodust",
+        "amount": 2
+      }
+    ],
+    "products": [
+      {
+        "item": "crafted_cement",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_quarry",
+    "name": "Pick up Quarry Rubble",
+    "description": "Pick up Quarry Rubble, bring it to a filtering facility.",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [],
+    "products": [
+      {
+        "item": "recycled_rubble",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_gsd_mine",
+    "name": "Use Explosives",
+    "description": "Use Explosives",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [
+      {
+        "item": "military_explosives",
+        "amount": 1
+      }
+    ],
+    "products": [
+      {
+        "item": "military_titanium_ore",
+        "amount": 4
+      },
+      {
+        "item": "scrap_gold",
+        "amount": 10
+      }
+    ]
+  },
+  {
+    "transformer_id": "trucking_land_act_reservoir",
+    "name": "Pick up Unfiltered Water",
+    "description": "Pick up some unfiltered water",
+    "in_money": 0,
+    "out_money": 0,
+    "reagents": [],
+    "products": [
+      {
+        "item": "liquid_water_raw",
+        "amount": 1
+      }
+    ]
+  }
+]
