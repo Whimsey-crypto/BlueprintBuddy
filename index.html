@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipe Menu</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: transparent;
+        html, body {
+            background: transparent !important;
             margin: 0;
             padding: 0;
+            overflow: hidden;
         }
         .menu-container {
             width: 300px;
-            background-color: #34495e;
+            background-color: rgba(52, 73, 94, 0.7); /* Transparent background with 70% opacity */
             padding: 10px;
             border-radius: 8px;
         }
@@ -21,16 +21,24 @@
             width: 100%;
             padding: 10px;
             margin: 5px 0;
-            background-color: #16a085;
+            background-color: rgba(22, 160, 133, 0.8); /* Slightly transparent teal */
             border: none;
             border-radius: 4px;
             color: white;
         }
         .ingredients-list {
             margin-top: 10px;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black for readability */
+            padding: 5px;
+            border-radius: 4px;
         }
         .ingredient {
             padding: 5px 0;
+            color: white;
+        }
+        h2 {
+            color: white;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -44,7 +52,6 @@
             <!-- Ingredients for the selected recipe will appear here -->
         </div>
     </div>
-
     <script>
         // Example recipe data (you'll get this from the game API or static data for now)
         const recipes = {
@@ -57,10 +64,8 @@
                 { name: "Ingredient D", amount: 4 }
             ]
         };
-
         const recipeSelect = document.getElementById('recipeSelect');
         const ingredientsDisplay = document.getElementById('ingredientsDisplay');
-
         // Populate recipe dropdown
         for (let recipe in recipes) {
             let option = document.createElement('option');
@@ -68,14 +73,11 @@
             option.textContent = recipe;
             recipeSelect.appendChild(option);
         }
-
         // Update ingredients display when recipe is selected
         recipeSelect.addEventListener('change', function() {
             const selectedRecipe = this.value;
             const ingredients = recipes[selectedRecipe];
-
             ingredientsDisplay.innerHTML = ''; // Clear existing ingredients
-
             ingredients.forEach(ingredient => {
                 let ingredientDiv = document.createElement('div');
                 ingredientDiv.classList.add('ingredient');
@@ -83,7 +85,6 @@
                 ingredientsDisplay.appendChild(ingredientDiv);
             });
         });
-
         // Initial load (first recipe)
         recipeSelect.dispatchEvent(new Event('change'));
     </script>
