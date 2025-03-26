@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipe Menu</title>
+    <title>BlueprintBuddy Recipe Calculator</title>
     <style>
         html, body {
             background: transparent !important;
@@ -11,46 +11,121 @@
             padding: 0;
             overflow: hidden;
             user-select: none;
+            font-family: Arial, sans-serif;
         }
         .menu-container {
-            width: 300px;
+            width: 320px;
             background-color: rgba(52, 73, 94, 0.7);
             padding: 10px;
             border-radius: 8px;
             position: absolute;
             min-width: 200px;
             min-height: 150px;
-            max-width: 500px;
-            max-height: 400px;
+            max-width: 600px;
+            max-height: 500px;
             overflow: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         .menu-header {
             padding-bottom: 10px;
             cursor: move;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 8px;
+        }
+        .tab-container {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .tab {
+            padding: 5px 10px;
+            background-color: rgba(22, 160, 133, 0.6);
+            color: white;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 2px;
+            cursor: pointer;
+        }
+        .tab.active {
+            background-color: rgba(22, 160, 133, 0.9);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
         }
         select, button {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             margin: 5px 0;
             background-color: rgba(22, 160, 133, 0.8);
             border: none;
             border-radius: 4px;
             color: white;
         }
+        select:disabled {
+            background-color: rgba(22, 160, 133, 0.4);
+        }
+        .category-select {
+            margin-bottom: 8px;
+        }
         .ingredients-list {
             margin-top: 10px;
             background-color: rgba(0, 0, 0, 0.5);
-            padding: 5px;
+            padding: 8px;
             border-radius: 4px;
         }
         .ingredient {
-            padding: 5px 0;
+            padding: 5px;
             color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2px;
+            border-radius: 3px;
         }
-        h2 {
+        .ingredient.have {
+            background-color: rgba(46, 204, 113, 0.3);
+        }
+        .ingredient.missing {
+            background-color: rgba(231, 76, 60, 0.3);
+        }
+        .ingredient.partial {
+            background-color: rgba(243, 156, 18, 0.3);
+        }
+        .ingredient-name {
+            flex: 1;
+        }
+        .ingredient-amount {
+            margin-left: 10px;
+            font-weight: bold;
+        }
+        .inventory-have {
+            margin-left: 10px;
+            font-size: 0.9em;
+            color: #aaffaa;
+        }
+        h2, h3 {
             color: white;
             margin: 0;
             display: inline-block;
+        }
+        h3 {
+            width: 100%;
+            margin-bottom: 10px;
+            display: block;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 5px;
         }
         .resize-handle {
             position: absolute;
@@ -63,121 +138,1347 @@
             clip-path: polygon(100% 0, 0 100%, 100% 100%);
             z-index: 10;
         }
+        .instruction {
+            color: white;
+            margin-top: 10px;
+            font-style: italic;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            padding-top: 5px;
+        }
+        .stat-bar {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+            margin-top: 10px;
+            padding: 5px;
+            color: white;
+            font-size: 0.9em;
+        }
+        .progress-bar {
+            height: 8px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            margin-top: 3px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: rgba(22, 160, 133, 0.8);
+            width: 0%;
+        }
+        .settings-section {
+            margin-bottom: 15px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            padding: 8px;
+        }
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            color: white;
+            align-items: center;
+        }
+        .settings-label {
+            flex: 1;
+        }
+        .settings-value {
+            width: 60px;
+            text-align: right;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #ffcc00;
+        }
+        input[type="number"] {
+            width: 60px;
+            background-color: rgba(22, 160, 133, 0.8);
+            border: none;
+            border-radius: 3px;
+            color: white;
+            padding: 3px 5px;
+        }
+        .inventory-tab {
+            color: white;
+        }
+        .inventory-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 5px;
+            border-radius: 3px;
+            margin-bottom: 2px;
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+        .recipe-cost {
+            color: #ffd700;
+            text-align: right;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .location-name {
+            color: #3498db;
+            font-size: 0.9em;
+            text-align: left;
+            margin-top: 2px;
+        }
+        .search-box {
+            width: calc(100% - 16px);
+            padding: 8px;
+            margin-bottom: 8px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: none;
+            border-radius: 4px;
+            color: white;
+        }
+        .search-box::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .no-results {
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-style: italic;
+        }
+        .favorite-btn {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+        .favorite-btn.active {
+            color: #ffd700;
+        }
     </style>
 </head>
 <body>
     <div class="menu-container" id="menuContainer">
         <div class="menu-header">
-            <h2>Recipe Menu</h2>
+            <h2>BlueprintBuddy</h2>
+            <button class="close-btn" id="closeBtn">×</button>
         </div>
-        <select id="recipeSelect">
-            <!-- Recipe options will be populated here -->
-        </select>
-        <div id="ingredientsDisplay" class="ingredients-list">
-            <!-- Ingredients for the selected recipe will appear here -->
+        
+        <div class="tab-container">
+            <button class="tab active" data-tab="recipes">Recipes</button>
+            <button class="tab" data-tab="inventory">Inventory</button>
+            <button class="tab" data-tab="settings">Settings</button>
         </div>
+        
+        <!-- Recipes Tab -->
+        <div id="recipes-tab" class="tab-content active">
+            <input type="text" id="recipeSearch" class="search-box" placeholder="Search recipes...">
+            
+            <select id="categorySelect" class="category-select">
+                <option value="">All Categories</option>
+                <option value="trucker">Trucking</option>
+                <option value="fridge">Food/Refrigerated</option>
+                <option value="petrochem">Petrochemical</option>
+                <option value="military">Military</option>
+            </select>
+            
+            <select id="recipeSelect">
+                <option value="">Select Recipe</option>
+            </select>
+            
+            <div id="ingredientsDisplay" class="ingredients-list">
+                <div class="ingredient">
+                    <span class="ingredient-name">Select a recipe to view ingredients</span>
+                </div>
+            </div>
+            
+            <div class="location-name" id="recipe-location"></div>
+            <div class="recipe-cost" id="recipe-cost"></div>
+            
+            <div class="stat-bar">
+                <div>Weight: <span id="recipe-weight">0</span> / <span id="max-weight">0</span></div>
+                <div class="progress-bar">
+                    <div id="weight-progress" class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="instruction" id="recipe-instructions">
+                Select a recipe to view instructions
+            </div>
+        </div>
+        
+        <!-- Inventory Tab -->
+        <div id="inventory-tab" class="tab-content">
+            <div class="inventory-tab">
+                <h3>Your Inventory</h3>
+                <input type="text" id="inventorySearch" class="search-box" placeholder="Search inventory...">
+                
+                <div id="player-inventory">
+                    <!-- Inventory items will be listed here -->
+                    <div class="inventory-item">
+                        <span>Loading inventory data...</span>
+                    </div>
+                </div>
+                
+                <div class="stat-bar">
+                    <div>Inventory Capacity: <span id="current-weight">0</span> / <span id="inventory-capacity">0</span></div>
+                    <div class="progress-bar">
+                        <div id="inventory-progress" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <button id="refresh-inventory">Refresh Inventory</button>
+            </div>
+        </div>
+        
+        // Settings Tab
+        <div id="settings-tab" class="tab-content">
+            <h3>Capacity Settings</h3>
+            
+            <div class="settings-section">
+                <div class="settings-row">
+                    <span class="settings-label">Strength Level:</span>
+                    <input type="number" id="strength-setting" min="1" max="30" value="10" class="settings-value">
+                </div>
+                
+                <div class="settings-row">
+                    <span class="settings-label">Truck Type:</span>
+                    <select id="truck-setting">
+                        <option value="0">Regular</option>
+                        <option value="6000">MK15</option>
+                    </select>
+                </div>
+                
+                <div class="settings-row">
+                    <span class="settings-label">Trailer Type:</span>
+                    <select id="trailer-setting">
+                        <option value="400">MK1 (400kg)</option>
+                        <option value="475">MK2 (475kg)</option>
+                        <option value="600">MK3 (600kg)</option>
+                        <option value="775">MK4 (775kg)</option>
+                        <option value="1000">MK5 (1000kg)</option>
+                        <option value="1500">MK6 (1500kg)</option>
+                        <option value="2200">MK7 (2200kg)</option>
+                        <option value="2500">MK8 (2500kg)</option>
+                        <option value="2750">MK9 (2750kg)</option>
+                        <option value="3000">MK10 (3000kg)</option>
+                        <option value="3500">MK11 (3500kg)</option>
+                        <option value="5000">MK12 (5000kg)</option>
+                        <option value="8500">MK13 (8500kg)</option>
+                        <option value="9000" selected>MK14 (9000kg)</option>
+                    </select>
+                </div>
+                
+                <div class="settings-row">
+                    <span class="settings-label">Premium Pass (+15%):</span>
+                    <input type="checkbox" id="premium-setting" checked>
+                </div>
+                
+                <div class="settings-row">
+                    <span class="settings-label">PostOp Perk (+15%):</span>
+                    <input type="checkbox" id="postop-setting">
+                </div>
+                
+                <div class="settings-row">
+                    <span class="settings-label">Farmers Milk (+20%):</span>
+                    <input type="checkbox" id="milk-setting">
+                </div>
+                
+                <div class="settings-row">
+                    <span class="settings-label">Total Capacity:</span>
+                    <span id="total-capacity" class="settings-value highlight">0</span>
+                </div>
+                
+                <div class="settings-row">
+                    <span class="settings-label">Auto-detect settings:</span>
+                    <input type="checkbox" id="auto-detect-setting" checked>
+                </div>
+            </div>
+            
+            <h3>Display Settings</h3>
+            
+            <div class="settings-section">
+                <div class="settings-row">
+                    <span class="settings-label">Show Missing Items:</span>
+                    <input type="checkbox" id="show-missing" checked>
+                </div>
+                
+                <div class="settings-row">
+                    <span class="settings-label">Auto Refresh (secs):</span>
+                    <input type="number" id="refresh-interval" min="0" max="60" value="10" class="settings-value">
+                </div>
+                
+                <div class="settings-row">
+                    <span class="settings-label">Favorite Recipes Only:</span>
+                    <input type="checkbox" id="favorites-only">
+                </div>
+            </div>
+            
+            <button id="save-settings">Save Settings</button>
+            <button id="clear-favorites" style="background-color: rgba(231, 76, 60, 0.8);">Clear Favorites</button>
+        </div>
+        
         <div class="resize-handle" id="resizeHandle"></div>
     </div>
+
     <script>
+        // Game client communication function
+        function sendCommand(command) {
+            try {
+                window.parent.postMessage(JSON.stringify(command), '*');
+            } catch (error) {
+                console.error('Failed to send command:', error);
+            }
+        }
+        
+        // Rational class (simplified from original app)
+        class Rational {
+            constructor(numerator, denominator = 1) {
+                this.numerator = numerator;
+                this.denominator = denominator;
+                this.simplify();
+            }
+            
+            simplify() {
+                const gcd = this.gcd(Math.abs(this.numerator), this.denominator);
+                this.numerator /= gcd;
+                this.denominator /= gcd;
+                return this;
+            }
+            
+            gcd(a, b) {
+                while (b) {
+                    const t = b;
+                    b = a % b;
+                    a = t;
+                }
+                return a;
+            }
+            
+            mul(other) {
+                if (typeof other === 'number') {
+                    return new Rational(this.numerator * other, this.denominator);
+                } else {
+                    return new Rational(
+                        this.numerator * other.numerator,
+                        this.denominator * other.denominator
+                    );
+                }
+            }
+            
+            div(other) {
+                if (typeof other === 'number') {
+                    return new Rational(this.numerator, this.denominator * other);
+                } else {
+                    return new Rational(
+                        this.numerator * other.denominator,
+                        this.denominator * other.numerator
+                    );
+                }
+            }
+            
+            add(other) {
+                if (typeof other === 'number') {
+                    return new Rational(
+                        this.numerator + other * this.denominator,
+                        this.denominator
+                    );
+                } else {
+                    return new Rational(
+                        this.numerator * other.denominator + other.numerator * this.denominator,
+                        this.denominator * other.denominator
+                    );
+                }
+            }
+            
+            toFloat() {
+                return this.numerator / this.denominator;
+            }
+            
+            toString() {
+                return `${this.numerator}/${this.denominator}`;
+            }
+            
+            static from_float(value) {
+                const precision = 1000000;
+                return new Rational(Math.round(value * precision), precision);
+            }
+            
+            static from_string(str) {
+                if (str.includes('/')) {
+                    const [num, denom] = str.split('/').map(Number);
+                    return new Rational(num, denom);
+                } else {
+                    return new Rational(Number(str), 1);
+                }
+            }
+        }
+        
+        // Ingredient class from original app
+        class Ingredient {
+            constructor(item, amount) {
+                this.item = item;
+                this.amount = amount;
+                this.weight = amount * (item.weight || 0);
+            }
+        }
+        
+        // Recipe class (simplified from original app)
+        class Recipe {
+            constructor(key, name, category, location, ingredients, products, weight, cost, pays = 0, instructions = "") {
+                this.key = key;
+                this.name = name;
+                this.category = category;
+                this.location = location;
+                this.ingredients = ingredients;
+                this.products = products;
+                this.weight = weight;
+                this.cost = cost;
+                this.pays = pays;
+                this.instructions = instructions;
+            }
+            
+            calculateTotalWeight() {
+                let totalWeight = 0;
+                for (const ingredient of this.ingredients) {
+                    const itemData = appState.items[ingredient[0]] || { weight: 0 };
+                    totalWeight += (itemData.weight * ingredient[1]) / 100;
+                }
+                return totalWeight;
+            }
+        }
+
+        // App State
+        const appState = {
+            recipes: {},
+            items: {},
+            inventory: {},
+            weight: 0,
+            maxWeight: 50,
+            strength: 10,
+            favorites: [],
+            gameData: {}, // Raw data received from game
+            capacity: {
+                strength: 10,
+                strengthMultiplier: 10, // 10kg per level
+                baseCapacity: 0,
+                truckCapacity: 0,
+                trailerCapacity: 9000, // Default to MK14
+                premium: true, // Premium pass gives 15% bonus
+                premiumMultiplier: 0.15,
+                postOp: false, // PostOp perk gives 15% bonus
+                postOpMultiplier: 0.15,
+                milk: false, // Farmers Milk gives 20% bonus
+                milkMultiplier: 0.20,
+                autoDetect: true // Whether to auto-detect settings from game data
+            },
+            settings: {
+                showMissing: true,
+                refreshInterval: 10,
+                favoritesOnly: false
+            }
+        };
+
+        // DOM Elements
         const menuContainer = document.getElementById('menuContainer');
         const resizeHandle = document.getElementById('resizeHandle');
         const menuHeader = document.querySelector('.menu-header');
-
-        // Dragging functionality
-        let isDragging = false;
-        let startX, startY, startLeft, startTop;
-
-        menuHeader.addEventListener('mousedown', function(e) {
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            startLeft = menuContainer.offsetLeft;
-            startTop = menuContainer.offsetTop;
-            e.preventDefault();
-        });
-
-        document.addEventListener('mousemove', function(e) {
-            if (!isDragging) return;
-            
-            let newLeft = startLeft + (e.clientX - startX);
-            let newTop = startTop + (e.clientY - startY);
-            
-            menuContainer.style.left = `${newLeft}px`;
-            menuContainer.style.top = `${newTop}px`;
-        });
-
-        document.addEventListener('mouseup', function() {
-            isDragging = false;
-        });
-
-        // Resizing functionality
-        let isResizing = false;
-        let startWidth, startHeight;
-
-        resizeHandle.addEventListener('mousedown', function(e) {
-            isResizing = true;
-            startWidth = menuContainer.offsetWidth;
-            startHeight = menuContainer.offsetHeight;
-            startX = e.clientX;
-            startY = e.clientY;
-            e.stopPropagation();
-        });
-
-        document.addEventListener('mousemove', function(e) {
-            if (!isResizing) return;
-            
-            let newWidth = startWidth + (e.clientX - startX);
-            let newHeight = startHeight + (e.clientY - startY);
-            
-            // Constrain to min and max sizes
-            newWidth = Math.max(200, Math.min(newWidth, 500));
-            newHeight = Math.max(150, Math.min(newHeight, 400));
-            
-            menuContainer.style.width = `${newWidth}px`;
-            menuContainer.style.height = `${newHeight}px`;
-        });
-
-        document.addEventListener('mouseup', function(e) {
-            isResizing = false;
-        });
-
-        // Recipe selection logic (same as before)
-        const recipes = {
-            "Recipe 1": [
-                { name: "Ingredient A", amount: 5 },
-                { name: "Ingredient B", amount: 3 }
-            ],
-            "Recipe 2": [
-                { name: "Ingredient C", amount: 2 },
-                { name: "Ingredient D", amount: 4 }
-            ]
-        };
+        const closeBtn = document.getElementById('closeBtn');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const categorySelect = document.getElementById('categorySelect');
         const recipeSelect = document.getElementById('recipeSelect');
+        const recipeSearch = document.getElementById('recipeSearch');
+        const inventorySearch = document.getElementById('inventorySearch');
         const ingredientsDisplay = document.getElementById('ingredientsDisplay');
-        
-        // Populate recipe dropdown
-        for (let recipe in recipes) {
-            let option = document.createElement('option');
-            option.value = recipe;
-            option.textContent = recipe;
-            recipeSelect.appendChild(option);
+        const recipeInstructions = document.getElementById('recipe-instructions');
+        const recipeWeight = document.getElementById('recipe-weight');
+        const recipeLocation = document.getElementById('recipe-location');
+        const recipeCost = document.getElementById('recipe-cost');
+        const maxWeightDisplay = document.getElementById('max-weight');
+        const weightProgress = document.getElementById('weight-progress');
+        const playerInventoryDisplay = document.getElementById('player-inventory');
+        const currentWeightDisplay = document.getElementById('current-weight');
+        const inventoryCapacityDisplay = document.getElementById('inventory-capacity');
+        const inventoryProgressDisplay = document.getElementById('inventory-progress');
+        const refreshInventoryBtn = document.getElementById('refresh-inventory');
+        const strengthSetting = document.getElementById('strength-setting');
+        const maxInventoryWeight = document.getElementById('max-inventory-weight');
+        const showMissingSetting = document.getElementById('show-missing');
+        const refreshIntervalSetting = document.getElementById('refresh-interval');
+        const favoritesOnlySetting = document.getElementById('favorites-only');
+        const saveSettingsBtn = document.getElementById('save-settings');
+        const clearFavoritesBtn = document.getElementById('clear-favorites');
+
+        // Initialize recipe database with a smaller subset of the original data
+        appState.recipes = {
+            "Battery": {
+                key_name: "batteries",
+                category: "ls-factory",
+                location: "LS Factory",
+                time: 1,
+                ingredients: [
+                    ["refined-zinc", 2],
+                    ["refined-solder", 4],
+                    ["scrap-acid", 8]
+                ],
+                products: [["batteries", 2]],
+                weight: 60,
+                cost: 5000,
+                instructions: "Combine zinc, solder and acid in a factory setting to create batteries."
+            },
+            "Bronze Alloy": {
+                key_name: "refined-bronze",
+                category: "ls-foundry",
+                location: "LS Foundry",
+                time: 1,
+                ingredients: [
+                    ["scrap-aluminum", 1],
+                    ["scrap-tin", 1],
+                    ["scrap-copper", 2]
+                ],
+                products: [["refined-bronze", 2]],
+                weight: 20,
+                cost: 1000,
+                instructions: "Mix aluminum, tin and copper in a foundry to create bronze alloy."
+            },
+            "Cement": {
+                key_name: "cement",
+                category: "quarry",
+                location: "Quarry",
+                time: 1,
+                ingredients: [
+                    ["refined-sand", 5],
+                    ["tcargodust", 2]
+                ],
+                products: [["cement", 1]],
+                weight: 25,
+                cost: 1500,
+                instructions: "Combine sand and sawdust at the quarry to create cement mix."
+            },
+            "Ceramic Tiles": {
+                key_name: "ceramictiles",
+                category: "ls-foundry",
+                location: "LS Foundry",
+                time: 1,
+                ingredients: [
+                    ["refined-sand", 2],
+                    ["refined-flint", 10]
+                ],
+                products: [["ceramictiles", 2]],
+                weight: 20,
+                cost: 1000,
+                instructions: "Mix sand and flint in a foundry to create ceramic tiles."
+            },
+            "Circuit Board": {
+                key_name: "circuit",
+                category: "ls-factory",
+                location: "LS Factory",
+                time: 1,
+                ingredients: [
+                    ["scrap-plastic", 10],
+                    ["refined-solder", 2],
+                    ["copperwire", 1]
+                ],
+                products: [["circuit", 2]],
+                weight: 40,
+                cost: 5000,
+                instructions: "Assemble plastic, solder and copper wire in a factory to create circuit boards."
+            },
+            "Computer": {
+                key_name: "computer",
+                category: "ls-factory",
+                location: "LS Factory",
+                time: 1,
+                ingredients: [
+                    ["circuit", 1],
+                    ["scrap-gold", 2],
+                    ["batteries", 1]
+                ],
+                products: [["computer", 2]],
+                weight: 70,
+                cost: 5000,
+                instructions: "Combine circuit boards, gold and batteries to create computers."
+            },
+            "Concrete": {
+                key_name: "concrete",
+                category: "filtering-plant",
+                location: "Filtering Plant",
+                time: 1,
+                ingredients: [
+                    ["cement", 5],
+                    ["liquid-water", 1]
+                ],
+                products: [["concrete", 1]],
+                weight: 160,
+                cost: 15000,
+                instructions: "Mix cement with water at the filtering plant to create concrete."
+            },
+            "Copper Wire": {
+                key_name: "copperwire",
+                category: "ls-factory",
+                location: "LS Factory",
+                time: 1,
+                ingredients: [
+                    ["refined-planks", 1],
+                    ["refined-copper", 4]
+                ],
+                products: [["copperwire", 2]],
+                weight: 40,
+                cost: 5000,
+                instructions: "Wind refined copper around wooden spools to create copper wire."
+            },
+            "Fiberglass Spool": {
+                key_name: "fiberglass",
+                category: "ls-factory",
+                location: "LS Factory",
+                time: 1,
+                ingredients: [
+                    ["refined-planks", 1],
+                    ["scrap-plastic", 8],
+                    ["refined-glass", 4]
+                ],
+                products: [["fiberglass", 2]],
+                weight: 40,
+                cost: 5000,
+                instructions: "Combine wood, plastic and glass to create fiberglass spools."
+            },
+            "Refined Flint": {
+                key_name: "refined-flint",
+                category: "filtering-plant",
+                location: "Filtering Plant",
+                time: 1,
+                ingredients: [
+                    ["scrap-gravel", 10]
+                ],
+                products: [
+                    ["refined-flint", 4],
+                    ["refined-sand", 6]
+                ],
+                weight: 50,
+                cost: 15000,
+                instructions: "Filter gravel at the filtering plant to separate flint and sand."
+            },
+            "Refined Glass": {
+                key_name: "refine-glass",
+                category: "ls-foundry",
+                location: "LS Foundry",
+                time: 1,
+                ingredients: [
+                    ["refined-sand", 1]
+                ],
+                products: [["refined-glass", 1]],
+                weight: 5,
+                cost: 1000,
+                instructions: "Melt sand in a foundry to create glass."
+            },
+            "House": {
+                key_name: "house",
+                category: "house-construction-site",
+                location: "House Construction Site",
+                time: 1,
+                ingredients: [
+                    ["ceramictiles", 4],
+                    ["concrete", 1],
+                    ["refined-planks", 2],
+                    ["copperwire", 1],
+                    ["computer", 1],
+                    ["rebar", 1]
+                ],
+                products: [["house", 1]],
+                weight: 0,
+                cost: 0,
+                pays: 2350000,
+                instructions: "Combine construction materials at the construction site to build a house."
+            }
+        };
+
+        // Initialize item database
+        appState.items = {
+            "batteries": { weight: 30, stack_size: 300 },
+            "refined-bronze": { weight: 10, stack_size: 900 },
+            "cement": { weight: 25, stack_size: 360 },
+            "ceramictiles": { weight: 10, stack_size: 900 },
+            "circuit": { weight: 20, stack_size: 450 },
+            "computer": { weight: 35, stack_size: 257 },
+            "concrete": { weight: 160, stack_size: 56 },
+            "copperwire": { weight: 20, stack_size: 450 },
+            "fiberglass": { weight: 20, stack_size: 450 },
+            "refined-flint": { weight: 5, stack_size: 1800 },
+            "refined-glass": { weight: 5, stack_size: 1800 },
+            "refined-sand": { weight: 5, stack_size: 1800 },
+            "tcargodust": { weight: 3, stack_size: 3000 },
+            "scrap-aluminum": { weight: 5, stack_size: 1800 },
+            "scrap-copper": { weight: 5, stack_size: 1800 },
+            "scrap-gold": { weight: 10, stack_size: 900 },
+            "scrap-gravel": { weight: 5, stack_size: 1800 },
+            "scrap-plastic": { weight: 5, stack_size: 1800 },
+            "scrap-tin": { weight: 5, stack_size: 1800 },
+            "refined-copper": { weight: 10, stack_size: 900 },
+            "refined-planks": { weight: 15, stack_size: 600 },
+            "refined-solder": { weight: 5, stack_size: 1800 },
+            "refined-zinc": { weight: 10, stack_size: 900 },
+            "liquid-water": { weight: 100, stack_size: 90 },
+            "rebar": { weight: 45, stack_size: 200 },
+            "scrap-acid": { weight: 5, stack_size: 1800 }
+        };
+
+        // Mock inventory data for testing - this would be replaced with actual game data
+        appState.inventory = {
+            "refined-zinc": 5,
+            "refined-solder": 10,
+            "scrap-acid": 20,
+            "scrap-aluminum": 8,
+            "scrap-tin": 4,
+            "scrap-copper": 12,
+            "refined-sand": 30,
+            "tcargodust": 50,
+            "refined-flint": 25,
+            "scrap-plastic": 40
+        };
+
+        // Load settings from localStorage
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('blueprintBuddy_settings');
+            if (savedSettings) {
+                const parsedSettings = JSON.parse(savedSettings);
+                appState.settings = { ...appState.settings, ...parsedSettings };
+                
+                // Update UI with loaded settings
+                showMissingSetting.checked = appState.settings.showMissing;
+                refreshIntervalSetting.value = appState.settings.refreshInterval;
+                favoritesOnlySetting.checked = appState.settings.favoritesOnly;
+            }
+            
+            // Load capacity settings
+            loadCapacitySettings();
+            
+            // Load favorites
+            const savedFavorites = localStorage.getItem('blueprintBuddy_favorites');
+            if (savedFavorites) {
+                appState.favorites = JSON.parse(savedFavorites);
+            }
+        }
+
+        // Save settings to localStorage
+        function saveSettings() {
+            const settingsToSave = {
+                showMissing: showMissingSetting.checked,
+                refreshInterval: parseInt(refreshIntervalSetting.value) || 0,
+                favoritesOnly: favoritesOnlySetting.checked
+            };
+            
+            localStorage.setItem('blueprintBuddy_settings', JSON.stringify(settingsToSave));
+            appState.settings = settingsToSave;
+            
+            // Save capacity settings
+            saveCapacitySettings();
+            
+            populateRecipeOptions(); // Refresh recipe list in case favorites-only changed
+            
+            // Update UI to reflect saved settings
+            const selectedRecipe = recipeSelect.value;
+            if (selectedRecipe) {
+                displayRecipeDetails(selectedRecipe);
+            }
+            
+            // Update refresh interval if it changed
+            if (refreshIntervalID) {
+                clearInterval(refreshIntervalID);
+                refreshIntervalID = null;
+            }
+            
+            if (appState.settings.refreshInterval > 0) {
+                refreshIntervalID = setInterval(function() {
+                    requestGameData(['inventory', 'weight', 'max_weight']);
+                }, appState.settings.refreshInterval * 1000);
+            }
+        }
+
+        // Save favorites to localStorage
+        function saveFavorites() {
+            localStorage.setItem('blueprintBuddy_favorites', JSON.stringify(appState.favorites));
+        }
+
+        // Update capacity calculation based on all settings
+        function calculateTotalCapacity() {
+            // Calculate strength-based capacity
+            const strengthCapacity = appState.capacity.strength * appState.capacity.strengthMultiplier;
+            
+            // Calculate multipliers from perks and bonuses
+            let multiplier = 1;
+            if (appState.capacity.premium) {
+                multiplier += appState.capacity.premiumMultiplier;
+            }
+            if (appState.capacity.postOp) {
+                multiplier += appState.capacity.postOpMultiplier;
+            }
+            if (appState.capacity.milk) {
+                multiplier += appState.capacity.milkMultiplier;
+            }
+            
+            // Add up all capacities with multipliers
+            const baseCapacity = strengthCapacity * multiplier;
+            const truckCapacity = appState.capacity.truckCapacity;
+            const trailerCapacity = appState.capacity.trailerCapacity;
+            
+            // Calculate total capacity
+            const totalCapacity = baseCapacity + truckCapacity + trailerCapacity;
+            
+            // Update UI
+            document.getElementById('total-capacity').textContent = Math.round(totalCapacity);
+            
+            return totalCapacity;
         }
         
-        // Update ingredients display when recipe is selected
-        recipeSelect.addEventListener('change', function() {
-            const selectedRecipe = this.value;
-            const ingredients = recipes[selectedRecipe];
-            ingredientsDisplay.innerHTML = ''; // Clear existing ingredients
-            ingredients.forEach(ingredient => {
-                let ingredientDiv = document.createElement('div');
+        // Update max weight based on capacity settings
+        function updateMaxWeight() {
+            // Calculate total capacity
+            appState.maxWeight = calculateTotalCapacity();
+            
+            // Update UI elements
+            maxWeightDisplay.textContent = appState.maxWeight;
+            maxInventoryWeight.textContent = appState.maxWeight;
+            
+            // Update progress bar
+            updateInventoryWeight();
+        }
+        
+        // Auto-detect settings from game data
+        function autoDetectSettings() {
+            if (!appState.capacity.autoDetect) return;
+            
+            // Try to detect strength from game data
+            if (appState.gameData.strength) {
+                const strength = parseInt(appState.gameData.strength);
+                if (!isNaN(strength) && strength > 0) {
+                    appState.capacity.strength = strength;
+                    document.getElementById('strength-setting').value = strength;
+                }
+            }
+            
+            // Try to detect vehicle type
+            if (appState.gameData.vehicleName) {
+                const vehicleName = appState.gameData.vehicleName;
+                if (vehicleName.includes('MK15')) {
+                    appState.capacity.truckCapacity = 6000;
+                    document.getElementById('truck-setting').value = "6000";
+                }
+            }
+            
+            // Try to detect trailer type from trailer data
+            if (appState.gameData.trailer) {
+                const trailerType = appState.gameData.trailer;
+                // This would need to map trailer names to capacity values
+                // For now, we'll leave it to manual setting
+            }
+            
+            // Try to detect perks (this may require specific game data fields)
+            // For now, we'll rely on manual settings for these
+            
+            // Update capacity calculation
+            updateMaxWeight();
+        }
+        
+        // Load capacity settings from localStorage
+        function loadCapacitySettings() {
+            const savedCapacity = localStorage.getItem('blueprintBuddy_capacity');
+            if (savedCapacity) {
+                const parsedCapacity = JSON.parse(savedCapacity);
+                appState.capacity = { ...appState.capacity, ...parsedCapacity };
+                
+                // Update UI with loaded settings
+                document.getElementById('strength-setting').value = appState.capacity.strength;
+                document.getElementById('truck-setting').value = appState.capacity.truckCapacity;
+                document.getElementById('trailer-setting').value = appState.capacity.trailerCapacity;
+                document.getElementById('premium-setting').checked = appState.capacity.premium;
+                document.getElementById('postop-setting').checked = appState.capacity.postOp;
+                document.getElementById('milk-setting').checked = appState.capacity.milk;
+                document.getElementById('auto-detect-setting').checked = appState.capacity.autoDetect;
+                
+                // Update capacity calculation
+                updateMaxWeight();
+            }
+        }
+        
+        // Save capacity settings to localStorage
+        function saveCapacitySettings() {
+            // Get values from UI
+            appState.capacity.strength = parseInt(document.getElementById('strength-setting').value) || 10;
+            appState.capacity.truckCapacity = parseInt(document.getElementById('truck-setting').value) || 0;
+            appState.capacity.trailerCapacity = parseInt(document.getElementById('trailer-setting').value) || 9000;
+            appState.capacity.premium = document.getElementById('premium-setting').checked;
+            appState.capacity.postOp = document.getElementById('postop-setting').checked;
+            appState.capacity.milk = document.getElementById('milk-setting').checked;
+            appState.capacity.autoDetect = document.getElementById('auto-detect-setting').checked;
+            
+            // Save to localStorage
+            localStorage.setItem('blueprintBuddy_capacity', JSON.stringify(appState.capacity));
+            
+            // Update capacity calculation
+            updateMaxWeight();
+        }
+
+        // Update inventory weight calculation
+        function updateInventoryWeight() {
+            let totalWeight = 0;
+            
+            for (const [itemId, quantity] of Object.entries(appState.inventory)) {
+                const itemData = appState.items[itemId];
+                if (itemData) {
+                    totalWeight += (itemData.weight * quantity) / 100; // Divide by 100 to make numbers more manageable
+                }
+            }
+            
+            appState.weight = Math.round(totalWeight);
+            currentWeightDisplay.textContent = appState.weight;
+            
+            // Update progress bar
+            const weightPercentage = Math.min(100, (appState.weight / appState.maxWeight) * 100);
+            inventoryProgressDisplay.style.width = `${weightPercentage}%`;
+            
+            // Change color based on how full inventory is
+            if (weightPercentage > 90) {
+                inventoryProgressDisplay.style.backgroundColor = 'rgba(231, 76, 60, 0.8)';
+            } else if (weightPercentage > 75) {
+                inventoryProgressDisplay.style.backgroundColor = 'rgba(243, 156, 18, 0.8)';
+            } else {
+                inventoryProgressDisplay.style.backgroundColor = 'rgba(22, 160, 133, 0.8)';
+            }
+        }
+
+        // Populate recipe options based on category filter and search term
+        function populateRecipeOptions() {
+            const category = categorySelect.value;
+            const searchTerm = recipeSearch.value.toLowerCase();
+            const favoritesOnly = appState.settings.favoritesOnly;
+            
+            // Clear current options
+            recipeSelect.innerHTML = '<option value="">Select Recipe</option>';
+            
+            // Filter and add recipe options
+            Object.entries(appState.recipes)
+                .filter(([name, recipe]) => {
+                    // Apply category filter if selected
+                    const categoryMatch = !category || recipe.category.includes(category);
+                    
+                    // Apply search filter if entered
+                    const searchMatch = !searchTerm || 
+                        name.toLowerCase().includes(searchTerm) || 
+                        recipe.key_name.toLowerCase().includes(searchTerm);
+                    
+                    // Apply favorites filter if enabled
+                    const favoriteMatch = !favoritesOnly || appState.favorites.includes(name);
+                    
+                    return categoryMatch && searchMatch && favoriteMatch;
+                })
+                .sort((a, b) => a[0].localeCompare(b[0])) // Sort alphabetically
+                .forEach(([name, recipe]) => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name;
+                    recipeSelect.appendChild(option);
+                });
+            
+            // Check if no recipes match filters
+            if (recipeSelect.options.length <= 1) {
+                const option = document.createElement('option');
+                option.value = "";
+                option.textContent = "No recipes match filters";
+                option.disabled = true;
+                recipeSelect.appendChild(option);
+            }
+        }
+
+        // Display recipe details
+        function displayRecipeDetails(recipeName) {
+            const recipe = appState.recipes[recipeName];
+            if (!recipe) return;
+            
+            ingredientsDisplay.innerHTML = '';
+            
+            let totalWeight = 0;
+            
+            // Calculate if user has ingredients and total weight
+            recipe.ingredients.forEach(([itemId, amount]) => {
+                const itemData = appState.items[itemId] || { weight: 0 };
+                const userHas = appState.inventory[itemId] || 0;
+                
+                // Calculate ingredient weight
+                const ingredientWeight = (itemData.weight * amount) / 100; // Divided by 100 to make numbers more manageable
+                totalWeight += ingredientWeight;
+                
+                // Create ingredient element
+                const ingredientDiv = document.createElement('div');
                 ingredientDiv.classList.add('ingredient');
-                ingredientDiv.textContent = `${ingredient.name}: ${ingredient.amount}`;
+                
+                // Determine if user has enough of this ingredient
+                if (userHas >= amount) {
+                    ingredientDiv.classList.add('have');
+                } else if (userHas > 0) {
+                    ingredientDiv.classList.add('partial');
+                } else {
+                    ingredientDiv.classList.add('missing');
+                }
+                
+                ingredientDiv.innerHTML = `
+                    <span class="ingredient-name">${itemId}</span>
+                    <span class="ingredient-amount">${amount}</span>
+                    <span class="inventory-have">${userHas}</span>
+                `;
+                
                 ingredientsDisplay.appendChild(ingredientDiv);
             });
-        });
+            
+            // Display recipe weight
+            recipeWeight.textContent = totalWeight.toFixed(1);
+            
+            // Update progress bar
+            const weightPercentage = Math.min(100, (totalWeight / appState.maxWeight) * 100);
+            weightProgress.style.width = `${weightPercentage}%`;
+            
+            // Change color based on weight
+            if (weightPercentage > 90) {
+                weightProgress.style.backgroundColor = 'rgba(231, 76, 60, 0.8)';
+            } else if (weightPercentage > 75) {
+                weightProgress.style.backgroundColor = 'rgba(243, 156, 18, 0.8)';
+            } else {
+                weightProgress.style.backgroundColor = 'rgba(22, 160, 133, 0.8)';
+            }
+            
+            // Update location and cost
+            recipeLocation.textContent = `Location: ${recipe.location}`;
+            
+            if (recipe.cost > 0) {
+                recipeCost.textContent = `Cost: $${recipe.cost.toLocaleString()}`;
+            } else if (recipe.pays > 0) {
+                recipeCost.textContent = `Pays: $${recipe.pays.toLocaleString()}`;
+            } else {
+                recipeCost.textContent = '';
+            }
+            
+            // Update instructions
+            recipeInstructions.textContent = recipe.instructions || 'No instructions available';
+            
+            // Add favorite button
+            const isFavorite = appState.favorites.includes(recipeName);
+            const favoriteBtn = document.createElement('button');
+            favoriteBtn.className = `favorite-btn ${isFavorite ? 'active' : ''}`;
+            favoriteBtn.textContent = isFavorite ? '★' : '☆';
+            favoriteBtn.title = isFavorite ? 'Remove from favorites' : 'Add to favorites';
+            favoriteBtn.onclick = () => toggleFavorite(recipeName);
+            
+            recipeInstructions.appendChild(document.createElement('br'));
+            recipeInstructions.appendChild(favoriteBtn);
+        }
+
+        // Toggle favorite status for a recipe
+        function toggleFavorite(recipeName) {
+            const index = appState.favorites.indexOf(recipeName);
+            if (index === -1) {
+                appState.favorites.push(recipeName);
+            } else {
+                appState.favorites.splice(index, 1);
+            }
+            
+            saveFavorites();
+            displayRecipeDetails(recipeName); // Refresh display
+        }
+
+        // Display inventory items
+        function displayInventory() {
+            const searchTerm = inventorySearch.value.toLowerCase();
+            playerInventoryDisplay.innerHTML = '';
+            
+            // Get sorted inventory items that match search
+            const items = Object.entries(appState.inventory)
+                .filter(([itemId, quantity]) => 
+                    !searchTerm || itemId.toLowerCase().includes(searchTerm))
+                .sort((a, b) => a[0].localeCompare(b[0]));
+            
+            if (items.length === 0) {
+                const noItemsDiv = document.createElement('div');
+                noItemsDiv.className = 'no-results';
+                noItemsDiv.textContent = searchTerm 
+                    ? 'No items match your search' 
+                    : 'No items in inventory';
+                playerInventoryDisplay.appendChild(noItemsDiv);
+                return;
+            }
+            
+            items.forEach(([itemId, quantity]) => {
+                const itemData = appState.items[itemId] || { weight: 0 };
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'inventory-item';
+                itemDiv.innerHTML = `
+                    <span>${itemId}</span>
+                    <span>${quantity} (${((itemData.weight * quantity) / 100).toFixed(1)} kg)</span>
+                `;
+                
+                playerInventoryDisplay.appendChild(itemDiv);
+            });
+        }
+
+        // Get inventory data from game
+        function getInventoryData() {
+            try {
+                // Request inventory data from game
+                sendCommand({ type: 'getNamedData', keys: ['inventory', 'weight', 'max_weight'] });
+                
+                // For demonstration, we'll just update with mock data
+                // In a real implementation, you would parse the response from the game
+                
+                // Simulating inventory changes
+                const randomItems = Object.keys(appState.items);
+                const randomItem = randomItems[Math.floor(Math.random() * randomItems.length)];
+                const randomAmount = Math.floor(Math.random() * 10) + 1;
+                
+                if (appState.inventory[randomItem]) {
+                    appState.inventory[randomItem] += randomAmount;
+                } else {
+                    appState.inventory[randomItem] = randomAmount;
+                }
+                
+                updateInventoryWeight();
+                displayInventory();
+                
+                // If a recipe is selected, refresh its display to show updated inventory status
+                const selectedRecipe = recipeSelect.value;
+                if (selectedRecipe) {
+                    displayRecipeDetails(selectedRecipe);
+                }
+            } catch (error) {
+                console.error('Failed to get inventory data:', error);
+            }
+        }
+
+        // Process game data received from the game client
+        function processGameData(data) {
+            // Store raw game data
+            for (const [key, value] of Object.entries(data)) {
+                appState.gameData[key] = value;
+            }
+            
+            // Handle inventory data
+            if (data.inventory) {
+                try {
+                    appState.inventory = JSON.parse(data.inventory);
+                    displayInventory();
+                    
+                    // If a recipe is selected, refresh its display
+                    const selectedRecipe = recipeSelect.value;
+                    if (selectedRecipe) {
+                        displayRecipeDetails(selectedRecipe);
+                    }
+                } catch (e) {
+                    console.error('Failed to parse inventory data:', e);
+                }
+            }
+            
+            // Handle weight and capacity data
+            if (data.weight) {
+                appState.weight = parseInt(data.weight);
+                currentWeightDisplay.textContent = appState.weight;
+            }
+            
+            if (data.max_weight) {
+                // We'll use our own calculation for max weight
+                // appState.maxWeight = parseInt(data.max_weight);
+                // maxWeightDisplay.textContent = appState.maxWeight;
+                // maxInventoryWeight.textContent = appState.maxWeight;
+            }
+            
+            // Auto-detect settings if enabled
+            autoDetectSettings();
+            
+            // Update UI elements
+            updateInventoryWeight();
+            
+            // You could add additional data handling for other game data here
+            // For example:
+            // - Handling vehicle data (trunk/trailer capacity)
+            // - Player position data (for showing nearby recipe locations)
+            // - Player job info
+        }
         
-        // Initial load (first recipe)
-        recipeSelect.dispatchEvent(new Event('change'));
+        // Request specific data from the game client
+        function requestGameData(keys = []) {
+            if (keys.length > 0) {
+                sendCommand({ type: 'getNamedData', keys: keys });
+            } else {
+                sendCommand({ type: 'getData' });
+            }
+        }
+
+        // Initialize app
+        function initApp() {
+            // Movable window functionality
+            let isDragging = false;
+            let startX, startY, startLeft, startTop;
+
+            menuHeader.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                startLeft = menuContainer.offsetLeft;
+                startTop = menuContainer.offsetTop;
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                let newLeft = startLeft + (e.clientX - startX);
+                let newTop = startTop + (e.clientY - startY);
+                
+                // Prevent moving outside viewport
+                newLeft = Math.max(0, Math.min(window.innerWidth - menuContainer.offsetWidth, newLeft));
+                newTop = Math.max(0, Math.min(window.innerHeight - menuContainer.offsetHeight, newTop));
+                
+                menuContainer.style.left = `${newLeft}px`;
+                menuContainer.style.top = `${newTop}px`;
+            });
+
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+
+            // Resizable window functionality
+            let isResizing = false;
+            let startWidth, startHeight;
+
+            resizeHandle.addEventListener('mousedown', function(e) {
+                isResizing = true;
+                startWidth = menuContainer.offsetWidth;
+                startHeight = menuContainer.offsetHeight;
+                startX = e.clientX;
+                startY = e.clientY;
+                e.stopPropagation();
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isResizing) return;
+                
+                let newWidth = startWidth + (e.clientX - startX);
+                let newHeight = startHeight + (e.clientY - startY);
+                
+                // Constrain to min and max sizes
+                newWidth = Math.max(200, Math.min(600, newWidth));
+                newHeight = Math.max(150, Math.min(500, newHeight));
+                
+                menuContainer.style.width = `${newWidth}px`;
+                menuContainer.style.height = `${newHeight}px`;
+            });
+
+            document.addEventListener('mouseup', function() {
+                isResizing = false;
+            });
+
+            // Tab switching functionality
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs and tab contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+
+            // Close button functionality
+            closeBtn.addEventListener('click', function() {
+                sendCommand({ type: 'close' });
+            });
+
+            // Recipe selection functionality
+            categorySelect.addEventListener('change', populateRecipeOptions);
+            recipeSearch.addEventListener('input', populateRecipeOptions);
+            
+            recipeSelect.addEventListener('change', function() {
+                const selectedRecipe = this.value;
+                if (selectedRecipe) {
+                    displayRecipeDetails(selectedRecipe);
+                } else {
+                    ingredientsDisplay.innerHTML = '<div class="ingredient"><span class="ingredient-name">Select a recipe to view ingredients</span></div>';
+                    recipeInstructions.textContent = 'Select a recipe to view instructions';
+                    recipeWeight.textContent = '0';
+                    weightProgress.style.width = '0%';
+                    recipeLocation.textContent = '';
+                    recipeCost.textContent = '';
+                }
+            });
+
+            // Inventory functionality
+            refreshInventoryBtn.addEventListener('click', function() {
+                requestGameData(['inventory', 'weight', 'max_weight']);
+            });
+            inventorySearch.addEventListener('input', displayInventory);
+
+            // Settings functionality
+            saveSettingsBtn.addEventListener('click', saveSettings);
+            
+            clearFavoritesBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear all favorites?')) {
+                    appState.favorites = [];
+                    saveFavorites();
+                    populateRecipeOptions();
+                }
+            });
+
+            // Initial setup
+            loadSettings();
+            populateRecipeOptions();
+            displayInventory();
+            updateInventoryWeight();
+            calculateTotalCapacity(); // Calculate initial capacity
+            
+            // Add event listeners for capacity settings
+            document.getElementById('strength-setting').addEventListener('input', calculateTotalCapacity);
+            document.getElementById('truck-setting').addEventListener('change', calculateTotalCapacity);
+            document.getElementById('trailer-setting').addEventListener('change', calculateTotalCapacity);
+            document.getElementById('premium-setting').addEventListener('change', calculateTotalCapacity);
+            document.getElementById('postop-setting').addEventListener('change', calculateTotalCapacity);
+            document.getElementById('milk-setting').addEventListener('change', calculateTotalCapacity);
+            document.getElementById('auto-detect-setting').addEventListener('change', function() {
+                if (this.checked) {
+                    autoDetectSettings();
+                }
+            });
+            
+            // Position in center of screen initially
+            menuContainer.style.left = `${(window.innerWidth - menuContainer.offsetWidth) / 2}px`;
+            menuContainer.style.top = `${(window.innerHeight - menuContainer.offsetHeight) / 2}px`;
+            
+            // Set up auto-refresh if interval > 0
+            let refreshIntervalID = null;
+            if (appState.settings.refreshInterval > 0) {
+                refreshIntervalID = setInterval(function() {
+                    requestGameData(['inventory', 'weight', 'max_weight']);
+                }, appState.settings.refreshInterval * 1000);
+            }
+            
+            // Keyboard event to ensure game controls work
+            document.addEventListener('keydown', function(e) {
+                // Forward ESC key to game client to ensure game controls work
+                if (e.key === 'Escape') {
+                    sendCommand({ type: 'pin' });
+                }
+            });
+            
+            // Listen for game data
+            window.addEventListener('message', function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    processGameData(data);
+                } catch (error) {
+                    console.error('Failed to process game data:', error);
+                }
+            });
+            
+            // Request initial data from game client
+            requestGameData(['inventory', 'weight', 'max_weight', 'strength']);
+        }
+
+        // Initialize on page load
+        window.onload = initApp;
     </script>
 </body>
 </html>
