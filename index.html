@@ -72,12 +72,18 @@
             border: none;
             border-radius: 4px;
             color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: rgba(22, 160, 133, 1);
         }
         .ingredients-list {
             margin-top: 10px;
             background-color: rgba(0, 0, 0, 0.5);
             padding: 8px;
             border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
         }
         .ingredient {
             padding: 5px;
@@ -187,6 +193,9 @@
             color: white;
             padding: 3px 5px;
         }
+        input[type="checkbox"] {
+            cursor: pointer;
+        }
         .inventory-tab {
             color: white;
         }
@@ -234,6 +243,30 @@
             text-align: center;
             background-color: rgba(22, 160, 133, 0.5);
         }
+        .favorite-btn {
+            background-color: rgba(231, 76, 60, 0.5);
+            margin-top: 5px;
+        }
+        .favorite-btn.active {
+            background-color: rgba(241, 196, 15, 0.8);
+        }
+        .favorite-btn:hover {
+            background-color: rgba(231, 76, 60, 0.8);
+        }
+        .favorite-btn.active:hover {
+            background-color: rgba(241, 196, 15, 1);
+        }
+        #player-inventory {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .app-version {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.7em;
+            position: absolute;
+            bottom: 5px;
+            right: 25px;
+        }
     </style>
 </head>
 <body>
@@ -263,11 +296,13 @@
             <div class="recipe-cost" id="recipe-cost">Pays: $2,350,000</div>
             
             <div class="stat-bar">
-                <div>Weight: <span id="recipe-weight">0</span> / <span id="max-weight">0</span></div>
+                <div>Weight: <span id="recipe-weight">0</span> / <span id="max-weight">0</span> kg</div>
                 <div class="progress-bar">
                     <div id="weight-progress" class="progress-fill" style="width: 0%"></div>
                 </div>
             </div>
+            
+            <button id="favorite-recipe" class="favorite-btn">★ Add to Favorites</button>
             
             <div class="instruction" id="recipe-instructions">
                 Combine construction materials at the construction site to build a house.
@@ -288,7 +323,7 @@
                 </div>
                 
                 <div class="stat-bar">
-                    <div>Inventory Capacity: <span id="current-weight">0</span> / <span id="inventory-capacity">0</span></div>
+                    <div>Inventory Capacity: <span id="current-weight">0</span> / <span id="inventory-capacity">0</span> kg</div>
                     <div class="progress-bar">
                         <div id="inventory-progress" class="progress-fill" style="width: 0%"></div>
                     </div>
@@ -301,7 +336,7 @@
         
         <!-- Settings Tab -->
         <div id="settings-tab" class="tab-content">
-            <h3>Capacity Settings</h3>
+            <h3>App Settings</h3>
             
             <div class="settings-section">
                 <div class="settings-row">
@@ -313,428 +348,36 @@
                     <span class="settings-label">Auto Refresh (secs):</span>
                     <input type="number" id="refresh-interval" min="0" max="60" value="10" class="settings-value">
                 </div>
+                
+                <div class="settings-row">
+                    <span class="settings-label">Auto-close Delay (secs):</span>
+                    <input type="number" id="auto-close-delay" min="0" max="60" value="0" class="settings-value">
+                    <small>(0 = disabled)</small>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <div class="settings-row">
+                    <span class="settings-label">Show Item Details:</span>
+                    <input type="checkbox" id="show-item-details" checked>
+                </div>
+                
+                <div class="settings-row">
+                    <span class="settings-label">Notify Missing Items:</span>
+                    <input type="checkbox" id="notify-missing-items" checked>
+                </div>
             </div>
             
             <button id="save-settings">Save Settings</button>
         </div>
         
         <div class="resize-handle" id="resizeHandle"></div>
+        <div class="app-version">BlueprintBuddy v2.0</div>
     </div>
 
-    <script>
-        // Game client communication function
-        function sendCommand(command) {
-            try {
-                console.log('Sending command to game:', command);
-                window.parent.postMessage(JSON.stringify(command), '*');
-            } catch (error) {
-                console.error('Failed to send command:', error);
-            }
-        }
-        
-        // App State - Bare minimum
-        const appState = {
-            inventory: {},
-            weight: 0,
-            maxWeight: 9000,
-            settings: {
-                refreshInterval: 10
-            },
-            // Just the House recipe and its required items
-            recipe: {
-                name: "House",
-                location: "House Construction Site",
-                ingredients: [
-                    ["ceramictiles", 4],
-                    ["concrete", 1],
-                    ["refined-planks", 2],
-                    ["copperwire", 1],
-                    ["computer", 1],
-                    ["rebar", 1]
-                ],
-                pays: 2350000,
-                instructions: "Combine construction materials at the construction site to build a house."
-            },
-            items: {
-                "ceramictiles": { weight: 10 },
-                "concrete": { weight: 160 },
-                "refined-planks": { weight: 15 },
-                "copperwire": { weight: 20 },
-                "computer": { weight: 35 },
-                "rebar": { weight: 45 }
-            }
-        };
-
-        // DOM Elements - Only what we need
-        const menuContainer = document.getElementById('menuContainer');
-        const resizeHandle = document.getElementById('resizeHandle');
-        const menuHeader = document.querySelector('.menu-header');
-        const closeBtn = document.getElementById('closeBtn');
-        const tabs = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const ingredientsDisplay = document.getElementById('ingredientsDisplay');
-        const recipeWeight = document.getElementById('recipe-weight');
-        const maxWeightDisplay = document.getElementById('max-weight');
-        const weightProgress = document.getElementById('weight-progress');
-        const playerInventoryDisplay = document.getElementById('player-inventory');
-        const inventorySearch = document.getElementById('inventorySearch');
-        const currentWeightDisplay = document.getElementById('current-weight');
-        const inventoryCapacityDisplay = document.getElementById('inventory-capacity');
-        const inventoryProgressDisplay = document.getElementById('inventory-progress');
-        const refreshInventoryBtn = document.getElementById('refresh-inventory');
-        const maxInventoryWeightSetting = document.getElementById('max-inventory-weight');
-        const refreshIntervalSetting = document.getElementById('refresh-interval');
-        const saveSettingsBtn = document.getElementById('save-settings');
-        const statusMessage = document.getElementById('status-message');
-
-        // Load settings from localStorage
-        function loadSettings() {
-            const savedSettings = localStorage.getItem('blueprintBuddy_settings');
-            if (savedSettings) {
-                const parsedSettings = JSON.parse(savedSettings);
-                appState.settings = { ...appState.settings, ...parsedSettings };
-                refreshIntervalSetting.value = appState.settings.refreshInterval;
-            }
-            
-            const savedMaxWeight = localStorage.getItem('blueprintBuddy_maxWeight');
-            if (savedMaxWeight) {
-                appState.maxWeight = parseInt(savedMaxWeight);
-                maxInventoryWeightSetting.value = appState.maxWeight;
-            }
-            
-            maxWeightDisplay.textContent = appState.maxWeight;
-            inventoryCapacityDisplay.textContent = appState.maxWeight;
-        }
-
-        // Save settings to localStorage
-        function saveSettings() {
-            appState.maxWeight = parseInt(maxInventoryWeightSetting.value) || 9000;
-            
-            const settingsToSave = {
-                refreshInterval: parseInt(refreshIntervalSetting.value) || 0
-            };
-            
-            localStorage.setItem('blueprintBuddy_settings', JSON.stringify(settingsToSave));
-            localStorage.setItem('blueprintBuddy_maxWeight', appState.maxWeight.toString());
-            
-            appState.settings = settingsToSave;
-            
-            maxWeightDisplay.textContent = appState.maxWeight;
-            inventoryCapacityDisplay.textContent = appState.maxWeight;
-            
-            setupAutoRefresh();
-            
-            statusMessage.textContent = 'Settings saved successfully';
-            statusMessage.style.backgroundColor = 'rgba(46, 204, 113, 0.5)'; // Green
-        }
-
-        // Update inventory weight calculation
-        function updateInventoryWeight() {
-            let totalWeight = 0;
-            
-            for (const [itemId, quantity] of Object.entries(appState.inventory)) {
-                const itemData = appState.items[itemId];
-                if (itemData) {
-                    totalWeight += (itemData.weight * quantity) / 100; // Divide by 100 to make numbers more manageable
-                }
-            }
-            
-            appState.weight = Math.round(totalWeight);
-            currentWeightDisplay.textContent = appState.weight;
-            
-            // Update progress bar
-            const weightPercentage = Math.min(100, (appState.weight / appState.maxWeight) * 100);
-            inventoryProgressDisplay.style.width = `${weightPercentage}%`;
-            
-            // Change color based on how full inventory is
-            if (weightPercentage > 90) {
-                inventoryProgressDisplay.style.backgroundColor = 'rgba(231, 76, 60, 0.8)';
-            } else if (weightPercentage > 75) {
-                inventoryProgressDisplay.style.backgroundColor = 'rgba(243, 156, 18, 0.8)';
-            } else {
-                inventoryProgressDisplay.style.backgroundColor = 'rgba(22, 160, 133, 0.8)';
-            }
-        }
-
-        // Display recipe details - Fixed for the House recipe
-        function displayRecipeDetails() {
-            ingredientsDisplay.innerHTML = '';
-            
-            let totalWeight = 0;
-            
-            // Calculate if user has ingredients and total weight
-            appState.recipe.ingredients.forEach(([itemId, amount]) => {
-                const itemData = appState.items[itemId] || { weight: 0 };
-                const userHas = appState.inventory[itemId] || 0;
-                
-                // Calculate ingredient weight
-                const ingredientWeight = (itemData.weight * amount) / 100; // Divided by 100 to make numbers more manageable
-                totalWeight += ingredientWeight;
-                
-                // Create ingredient element
-                const ingredientDiv = document.createElement('div');
-                ingredientDiv.classList.add('ingredient');
-                
-                // Determine if user has enough of this ingredient
-                if (userHas >= amount) {
-                    ingredientDiv.classList.add('have');
-                } else if (userHas > 0) {
-                    ingredientDiv.classList.add('partial');
-                } else {
-                    ingredientDiv.classList.add('missing');
-                }
-                
-                ingredientDiv.innerHTML = `
-                    <span class="ingredient-name">${itemId}</span>
-                    <span class="ingredient-amount">${amount}</span>
-                    <span class="inventory-have">${userHas}</span>
-                `;
-                
-                ingredientsDisplay.appendChild(ingredientDiv);
-            });
-            
-            // Display recipe weight
-            recipeWeight.textContent = totalWeight.toFixed(1);
-            
-            // Update progress bar
-            const weightPercentage = Math.min(100, (totalWeight / appState.maxWeight) * 100);
-            weightProgress.style.width = `${weightPercentage}%`;
-            
-            // Change color based on weight
-            if (weightPercentage > 90) {
-                weightProgress.style.backgroundColor = 'rgba(231, 76, 60, 0.8)';
-            } else if (weightPercentage > 75) {
-                weightProgress.style.backgroundColor = 'rgba(243, 156, 18, 0.8)';
-            } else {
-                weightProgress.style.backgroundColor = 'rgba(22, 160, 133, 0.8)';
-            }
-        }
-
-        // Display inventory items
-        function displayInventory() {
-            const searchTerm = inventorySearch.value.toLowerCase();
-            playerInventoryDisplay.innerHTML = '';
-            
-            // Get sorted inventory items that match search
-            const items = Object.entries(appState.inventory)
-                .filter(([itemId, quantity]) => 
-                    !searchTerm || itemId.toLowerCase().includes(searchTerm))
-                .sort((a, b) => a[0].localeCompare(b[0]));
-            
-            if (items.length === 0) {
-                const noItemsDiv = document.createElement('div');
-                noItemsDiv.className = 'no-results';
-                noItemsDiv.textContent = searchTerm 
-                    ? 'No items match your search' 
-                    : 'No items in inventory';
-                playerInventoryDisplay.appendChild(noItemsDiv);
-                return;
-            }
-            
-            items.forEach(([itemId, quantity]) => {
-                const itemData = appState.items[itemId] || { weight: 0 };
-                
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'inventory-item';
-                itemDiv.innerHTML = `
-                    <span>${itemId}</span>
-                    <span>${quantity} (${((itemData.weight * quantity) / 100).toFixed(1)} kg)</span>
-                `;
-                
-                playerInventoryDisplay.appendChild(itemDiv);
-            });
-        }
-
-        // Get inventory data from game
-        function getInventoryData() {
-            try {
-                statusMessage.textContent = 'Requesting inventory data...';
-                statusMessage.style.backgroundColor = 'rgba(243, 156, 18, 0.5)'; // Orange
-                
-                sendCommand({ type: 'getNamedData', keys: ['inventory', 'weight', 'max_weight'] });
-            } catch (error) {
-                console.error('Failed to get inventory data:', error);
-                statusMessage.textContent = 'Error requesting data: ' + error.message;
-                statusMessage.style.backgroundColor = 'rgba(231, 76, 60, 0.5)'; // Red
-            }
-        }
-
-        // Process game data received from the game client
-        function processGameData(data) {
-            console.log('Received game data:', data);
-            
-            statusMessage.textContent = 'Data received, processing...';
-            
-            // Handle inventory data
-            if (data.inventory) {
-                try {
-                    appState.inventory = JSON.parse(data.inventory);
-                    displayInventory();
-                    displayRecipeDetails(); // Update recipe display with new inventory
-                    
-                    // Show last update time
-                    const now = new Date();
-                    const timeStr = now.toLocaleTimeString();
-                    statusMessage.textContent = `Inventory updated at ${timeStr}`;
-                    statusMessage.style.backgroundColor = 'rgba(46, 204, 113, 0.5)'; // Green
-                } catch (e) {
-                    console.error('Failed to parse inventory data:', e);
-                    statusMessage.textContent = 'Error parsing inventory data: ' + e.message;
-                    statusMessage.style.backgroundColor = 'rgba(231, 76, 60, 0.5)'; // Red
-                }
-            }
-            
-            // Handle weight data
-            if (data.weight !== undefined) {
-                appState.weight = parseInt(data.weight);
-                currentWeightDisplay.textContent = appState.weight;
-            }
-            
-            // Update UI elements
-            updateInventoryWeight();
-        }
-
-        // Initialize app
-        function initApp() {
-            console.log('Initializing BlueprintBuddy...');
-            
-            statusMessage.textContent = 'Initializing BlueprintBuddy...';
-            
-            // Set up movable window
-            let isDragging = false;
-            let startX, startY, startLeft, startTop;
-
-            menuHeader.addEventListener('mousedown', function(e) {
-                isDragging = true;
-                startX = e.clientX;
-                startY = e.clientY;
-                startLeft = menuContainer.offsetLeft;
-                startTop = menuContainer.offsetTop;
-                e.preventDefault();
-            });
-
-            document.addEventListener('mousemove', function(e) {
-                if (!isDragging) return;
-                
-                let newLeft = startLeft + (e.clientX - startX);
-                let newTop = startTop + (e.clientY - startY);
-                
-                // Prevent moving outside viewport
-                newLeft = Math.max(0, Math.min(window.innerWidth - menuContainer.offsetWidth, newLeft));
-                newTop = Math.max(0, Math.min(window.innerHeight - menuContainer.offsetHeight, newTop));
-                
-                menuContainer.style.left = `${newLeft}px`;
-                menuContainer.style.top = `${newTop}px`;
-            });
-
-            document.addEventListener('mouseup', function() {
-                isDragging = false;
-            });
-
-            // Set up resizable window
-            let isResizing = false;
-            let startWidth, startHeight;
-
-            resizeHandle.addEventListener('mousedown', function(e) {
-                isResizing = true;
-                startWidth = menuContainer.offsetWidth;
-                startHeight = menuContainer.offsetHeight;
-                startX = e.clientX;
-                startY = e.clientY;
-                e.stopPropagation();
-            });
-
-            document.addEventListener('mousemove', function(e) {
-                if (!isResizing) return;
-                
-                let newWidth = startWidth + (e.clientX - startX);
-                let newHeight = startHeight + (e.clientY - startY);
-                
-                newWidth = Math.max(200, Math.min(600, newWidth));
-                newHeight = Math.max(150, Math.min(750, newHeight));
-                
-                menuContainer.style.width = `${newWidth}px`;
-                menuContainer.style.height = `${newHeight}px`;
-            });
-
-            document.addEventListener('mouseup', function() {
-                isResizing = false;
-            });
-
-            // Set up tab switching
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(c => c.classList.remove('active'));
-                    
-                    this.classList.add('active');
-                    const tabId = this.getAttribute('data-tab');
-                    document.getElementById(`${tabId}-tab`).classList.add('active');
-                });
-            });
-
-            // Close button functionality
-            closeBtn.addEventListener('click', function() {
-                statusMessage.textContent = 'Closing application...';
-                sendCommand({ type: 'close' });
-            });
-
-            // Inventory functionality
-            refreshInventoryBtn.addEventListener('click', getInventoryData);
-            inventorySearch.addEventListener('input', displayInventory);
-
-            // Settings functionality
-            saveSettingsBtn.addEventListener('click', saveSettings);
-
-            // Auto-refresh setup
-            function setupAutoRefresh() {
-                if (window.refreshIntervalID) {
-                    clearInterval(window.refreshIntervalID);
-                    window.refreshIntervalID = null;
-                }
-                
-                if (appState.settings.refreshInterval > 0) {
-                    window.refreshIntervalID = setInterval(getInventoryData, 
-                                                    appState.settings.refreshInterval * 1000);
-                    console.log(`Auto-refresh set up for every ${appState.settings.refreshInterval} seconds`);
-                }
-            }
-
-            // Initial setup
-            loadSettings();
-            displayRecipeDetails();
-            setupAutoRefresh();
-            
-            // Position in center of screen initially
-            menuContainer.style.left = `${(window.innerWidth - menuContainer.offsetWidth) / 2}px`;
-            menuContainer.style.top = `${(window.innerHeight - menuContainer.offsetHeight) / 2}px`;
-            
-            // ESC key handler
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    sendCommand({ type: 'pin' });
-                }
-            });
-            
-            // Message listener for game data
-            window.addEventListener('message', function(event) {
-                try {
-                    const data = JSON.parse(event.data);
-                    processGameData(data);
-                } catch (error) {
-                    console.error('Failed to process game data:', error);
-                }
-            });
-            
-            // Request initial data from game
-            getInventoryData();
-            
-            statusMessage.textContent = 'BlueprintBuddy ready and waiting for game data';
-            statusMessage.style.backgroundColor = 'rgba(22, 160, 133, 0.5)'; // Teal
-        }
-
-        // Initialize on page load
-        window.onload = initApp;
-    </script>
+    <!-- Load external scripts in the correct order -->
+    <script src="items.js"></script>
+    <script src="recipes.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
