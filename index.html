@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -144,94 +145,17 @@
             border-top: 1px solid rgba(255,255,255,0.3);
             padding-top: 5px;
         }
-        .stat-bar {
-            background-color: rgba(0, 0, 0, 0.3);
-            border-radius: 3px;
-            margin-top: 10px;
-            padding: 5px;
-            color: white;
-            font-size: 0.9em;
-        }
-        .progress-bar {
-            height: 8px;
-            background-color: rgba(0, 0, 0, 0.3);
-            border-radius: 4px;
-            margin-top: 3px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background-color: rgba(22, 160, 133, 0.8);
-            width: 0%;
-        }
-        .settings-section {
-            margin-bottom: 15px;
-            background-color: rgba(0, 0, 0, 0.2);
-            border-radius: 4px;
-            padding: 8px;
-        }
-        .settings-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            color: white;
-            align-items: center;
-        }
-        .settings-label {
-            flex: 1;
-        }
-        .settings-value {
-            width: 60px;
-            text-align: right;
-        }
-        input[type="number"] {
-            width: 60px;
-            background-color: rgba(22, 160, 133, 0.8);
-            border: none;
-            border-radius: 3px;
-            color: white;
-            padding: 3px 5px;
-        }
-        input[type="checkbox"] {
-            cursor: pointer;
-        }
-        .inventory-tab {
-            color: white;
-        }
-        .inventory-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 3px 5px;
-            border-radius: 3px;
-            margin-bottom: 2px;
-            background-color: rgba(0, 0, 0, 0.3);
-        }
-        .recipe-cost {
-            color: #ffd700;
-            text-align: right;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
         .location-name {
             color: #3498db;
             font-size: 0.9em;
             text-align: left;
             margin-top: 2px;
         }
-        .search-box {
-            width: calc(100% - 16px);
-            padding: 8px;
-            margin-bottom: 8px;
-            background-color: rgba(0, 0, 0, 0.3);
-            border: none;
-            border-radius: 4px;
-            color: white;
-        }
-        .no-results {
-            color: white;
-            text-align: center;
-            padding: 10px;
-            font-style: italic;
+        .recipe-cost {
+            color: #ffd700;
+            text-align: right;
+            font-size: 0.9em;
+            margin-top: 5px;
         }
         .status-indicator {
             color: white;
@@ -242,29 +166,44 @@
             text-align: center;
             background-color: rgba(22, 160, 133, 0.5);
         }
-        .favorite-btn {
-            background-color: rgba(231, 76, 60, 0.5);
-            margin-top: 5px;
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 5px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
         }
-        .favorite-btn.active {
-            background-color: rgba(241, 196, 15, 0.8);
+        .calculation-results {
+            margin-top: 10px;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+            border-radius: 4px;
+            color: white;
         }
-        .favorite-btn:hover {
-            background-color: rgba(231, 76, 60, 0.8);
-        }
-        .favorite-btn.active:hover {
-            background-color: rgba(241, 196, 15, 1);
-        }
-        #player-inventory {
-            max-height: 200px;
+        .requirements-list {
+            max-height: 150px;
             overflow-y: auto;
+            margin-bottom: 10px;
         }
-        .app-version {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.7em;
-            position: absolute;
-            bottom: 5px;
-            right: 25px;
+        .requirement-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            margin-bottom: 2px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .requirement-item:hover {
+            background-color: rgba(22, 160, 133, 0.3);
+        }
+        .calculate-btn, .route-btn {
+            background-color: rgba(41, 128, 185, 0.8);
+            margin-left: 5px;
+        }
+        .calculate-btn:hover, .route-btn:hover {
+            background-color: rgba(41, 128, 185, 1);
         }
     </style>
 </head>
@@ -284,316 +223,102 @@
         <!-- Recipes Tab -->
         <div id="recipes-tab" class="tab-content active">
             <select id="recipeSelect">
-                <option value="House" selected>House</option>
+                <option value="">Loading recipes...</option>
             </select>
+            
+            <div class="quantity-selector">
+                <label for="recipe-quantity" style="color: white; flex: 1;">Quantity:</label>
+                <input type="number" id="recipe-quantity" min="1" max="10000" value="1" style="width: 70px;">
+                <button id="calculate-runs" class="calculate-btn">Calculate</button>
+            </div>
             
             <div id="ingredientsDisplay" class="ingredients-list">
                 <!-- Ingredients will be displayed here -->
-            </div>
-            
-            <div class="location-name" id="recipe-location">Location: House Construction Site</div>
-            <div class="recipe-cost" id="recipe-cost">Pays: $2,350,000</div>
-            
-            <div class="stat-bar">
-                <div>Weight: <span id="recipe-weight">0</span> / <span id="max-weight">0</span> kg</div>
-                <div class="progress-bar">
-                    <div id="weight-progress" class="progress-fill" style="width: 0%"></div>
+                <div class="ingredient">
+                    <span class="ingredient-name">Select a recipe to view ingredients</span>
                 </div>
             </div>
             
-            <button id="favorite-recipe" class="favorite-btn">★ Add to Favorites</button>
+            <div id="runs-calculation" class="calculation-results" style="display: none;">
+                <h3>Resource Requirements</h3>
+                <div id="total-requirements" class="requirements-list"></div>
+                <div style="margin-top: 5px;">
+                    Total Runs Needed: <span id="total-runs">0</span>
+                </div>
+                <button id="show-route-btn" style="margin-top: 5px; display: none;">Show Route</button>
+            </div>
+            
+            <div class="location-name" id="recipe-location">Location: Select a recipe</div>
+            <div class="recipe-cost" id="recipe-cost">Pays: $0</div>
             
             <div class="instruction" id="recipe-instructions">
-                Combine construction materials at the construction site to build a house.
+                Select a recipe to see instructions.
             </div>
         </div>
         
         <!-- Inventory Tab -->
         <div id="inventory-tab" class="tab-content">
-            <div class="inventory-tab">
-                <h3>Your Inventory</h3>
-                <input type="text" id="inventorySearch" class="search-box" placeholder="Search inventory...">
-                
-                <div id="player-inventory">
-                    <!-- Inventory items will be listed here -->
-                    <div class="inventory-item">
-                        <span>Loading inventory data...</span>
-                    </div>
-                </div>
-                
-                <div class="stat-bar">
-                    <div>Inventory Capacity: <span id="current-weight">0</span> / <span id="inventory-capacity">0</span> kg</div>
-                    <div class="progress-bar">
-                        <div id="inventory-progress" class="progress-fill" style="width: 0%"></div>
-                    </div>
-                </div>
-                
-                <button id="refresh-inventory">Refresh Inventory</button>
-                <div id="status-message" class="status-indicator">Waiting for game data...</div>
-            </div>
+            <h3>Inventory</h3>
+            <div id="status-message" class="status-indicator">Waiting for game data...</div>
+            <button id="refresh-inventory">Refresh Inventory</button>
         </div>
         
         <!-- Settings Tab -->
         <div id="settings-tab" class="tab-content">
-            <h3>App Settings</h3>
-            
-            <div class="settings-section">
-                <div class="settings-row">
-                    <span class="settings-label">Max Inventory Weight:</span>
-                    <input type="number" id="max-inventory-weight" min="1" max="20000" value="9000" class="settings-value">
-                </div>
-                
-                <div class="settings-row">
-                    <span class="settings-label">Auto Refresh (secs):</span>
-                    <input type="number" id="refresh-interval" min="0" max="60" value="10" class="settings-value">
-                </div>
-                
-                <div class="settings-row">
-                    <span class="settings-label">Auto-close Delay (secs):</span>
-                    <input type="number" id="auto-close-delay" min="0" max="60" value="0" class="settings-value">
-                    <small>(0 = disabled)</small>
-                </div>
+            <h3>Settings</h3>
+            <div style="color: white;">
+                Settings will be implemented in future versions.
             </div>
-            
-            <div class="settings-section">
-                <div class="settings-row">
-                    <span class="settings-label">Show Item Details:</span>
-                    <input type="checkbox" id="show-item-details" checked>
-                </div>
-                
-                <div class="settings-row">
-                    <span class="settings-label">Notify Missing Items:</span>
-                    <input type="checkbox" id="notify-missing-items" checked>
-                </div>
-            </div>
-            
-            <button id="save-settings">Save Settings</button>
         </div>
         
         <div class="resize-handle" id="resizeHandle"></div>
-        <div class="app-version">BlueprintBuddy v2.0</div>
     </div>
 
+    <!-- Load the recipe data first -->
+    <script src="recipes.ejs"></script>
+    <script src="items.ejs"></script>
+    
+    <!-- Main App Script -->
     <script>
-        // Data definition for items
-        const ITEMS_DATA = {
-            // Construction Materials
-            "ceramictiles": { 
-                weight: 10, 
-                category: "construction",
-                displayName: "Ceramic Tiles",
-                description: "High-quality ceramic tiles for flooring"
-            },
-            "concrete": { 
-                weight: 160, 
-                category: "construction",
-                displayName: "Concrete Mix",
-                description: "Ready-to-use concrete mix"
-            },
-            "refined-planks": { 
-                weight: 15, 
-                category: "construction",
-                displayName: "Refined Planks",
-                description: "Smoothed wooden planks for construction"
-            },
-            "copperwire": { 
-                weight: 20, 
-                category: "electrical",
-                displayName: "Copper Wire",
-                description: "Electrical wiring for buildings"
-            },
-            "computer": { 
-                weight: 35, 
-                category: "electronics",
-                displayName: "Computer",
-                description: "Desktop computer for automation systems"
-            },
-            "rebar": { 
-                weight: 45, 
-                category: "construction",
-                displayName: "Reinforcement Bar",
-                description: "Steel rods for reinforcing concrete"
-            },
-            "glass": { 
-                weight: 25, 
-                category: "construction",
-                displayName: "Glass Panels",
-                description: "Tempered glass for windows"
-            },
-            "steel-beams": { 
-                weight: 80, 
-                category: "construction",
-                displayName: "Steel Beams",
-                description: "Heavy load-bearing steel beams"
-            },
-            "steel-pipes": { 
-                weight: 40, 
-                category: "construction",
-                displayName: "Steel Pipes",
-                description: "Industrial steel pipes for plumbing"
-            },
-            "wooden-doors": { 
-                weight: 30, 
-                category: "construction",
-                displayName: "Wooden Doors",
-                description: "Pre-made wooden doors"
-            },
-            "roof-tiles": { 
-                weight: 15, 
-                category: "construction",
-                displayName: "Roof Tiles",
-                description: "Weather-resistant roof tiles"
-            },
-            "insulation": { 
-                weight: 8, 
-                category: "construction",
-                displayName: "Insulation Material",
-                description: "Thermal insulation for walls"
-            }
-        };
-
-        // Data definition for recipes
-        const RECIPES_DATA = {
-            "House": {
-                name: "House",
-                location: "House Construction Site",
-                ingredients: [
-                    ["ceramictiles", 4],
-                    ["concrete", 1],
-                    ["refined-planks", 2],
-                    ["copperwire", 1],
-                    ["computer", 1],
-                    ["rebar", 1]
-                ],
-                pays: 2350000,
-                instructions: "Combine construction materials at the construction site to build a house."
-            },
-            "Garage": {
-                name: "Garage",
-                location: "Garage Construction Site", 
-                ingredients: [
-                    ["concrete", 1],
-                    ["refined-planks", 1],
-                    ["rebar", 1]
-                ],
-                pays: 950000,
-                instructions: "Build a garage at the construction site using these materials."
-            },
-            "Office Building": {
-                name: "Office Building",
-                location: "Commercial District", 
-                ingredients: [
-                    ["ceramictiles", 8],
-                    ["concrete", 3],
-                    ["refined-planks", 4],
-                    ["copperwire", 2],
-                    ["computer", 4],
-                    ["rebar", 2],
-                    ["glass", 5]
-                ],
-                pays: 5250000,
-                instructions: "Construct an office building in the commercial district."
-            },
-            "Small Bridge": {
-                name: "Small Bridge",
-                location: "Infrastructure Zone", 
-                ingredients: [
-                    ["concrete", 2],
-                    ["rebar", 3],
-                    ["steel-beams", 2]
-                ],
-                pays: 1850000,
-                instructions: "Build a small bridge at the infrastructure zone."
-            },
-            "Water Tower": {
-                name: "Water Tower",
-                location: "Rural Area", 
-                ingredients: [
-                    ["concrete", 1],
-                    ["rebar", 2],
-                    ["steel-beams", 1],
-                    ["steel-pipes", 3]
-                ],
-                pays: 1350000,
-                instructions: "Construct a water tower in the rural area to improve water supply."
-            }
-        };
-
-        // Game client communication function
-        function sendGameCommand(command) {
-            try {
-                console.log('Sending command to game:', command);
-                window.parent.postMessage(JSON.stringify(command), '*');
-            } catch (error) {
-                console.error('Failed to send command:', error);
-            }
-        }
-
-        // Main application class
+        // Main App Class
         class BlueprintBuddy {
             constructor() {
-                // App state
+                // Basic state
                 this.state = {
                     inventory: {},
-                    weight: 0,
-                    maxWeight: 9000,
-                    settings: {
-                        refreshInterval: 10,
-                        notifyMissingItems: true,
-                        showItemDetails: true,
-                        autoCloseDelay: 0,
-                        favoriteRecipes: []
-                    },
-                    selectedRecipe: "House",
-                    searchTerm: "",
-                    lastUpdate: null,
-                    gameConnected: false
+                    selectedRecipe: ""
                 };
                 
-                // Item and recipe data
-                this.items = ITEMS_DATA;
-                this.recipes = RECIPES_DATA;
-                
-                // Element references - will be populated in init()
+                // References to DOM elements
                 this.elements = {};
                 
-                // Auto-refresh timer
-                this.refreshTimer = null;
+                // Game connection setup
+                this.isGameConnected = false;
             }
             
-            // Initialize the application
+            // Initialize the app
             init() {
                 console.log('Initializing BlueprintBuddy...');
                 
-                // Set up DOM element references
+                // Get DOM element references
                 this.setupElementReferences();
                 
-                // Load saved settings
-                this.loadSettings();
-                
-                // Set up UI event handlers
+                // Set up event handlers
                 this.setupEventHandlers();
                 
-                // Make the menu movable and resizable
+                // Make menu draggable and resizable
                 this.setupMenuInteraction();
                 
-                // Set up game client communication
+                // Set up game connection
                 this.setupGameConnection();
                 
-                // Initial UI population
-                this.populateRecipeSelect();
-                this.displayRecipeDetails();
-                this.setupAutoRefresh();
+                // Load recipes from external file
+                this.loadRecipes();
                 
-                // Position initially in center
+                // Center menu initially
                 const menuContainer = this.elements.menuContainer;
                 menuContainer.style.left = `${(window.innerWidth - menuContainer.offsetWidth) / 2}px`;
                 menuContainer.style.top = `${(window.innerHeight - menuContainer.offsetHeight) / 2}px`;
-                
-                // Request initial game data
-                this.getInventoryData();
-                
-                this.updateStatusMessage('BlueprintBuddy ready and waiting for game data');
             }
             
             // Set up references to DOM elements
@@ -606,152 +331,25 @@
                     tabs: document.querySelectorAll('.tab'),
                     tabContents: document.querySelectorAll('.tab-content'),
                     
-                    // Recipe tab elements
+                    // Recipe elements
                     recipeSelect: document.getElementById('recipeSelect'),
+                    recipeQuantity: document.getElementById('recipe-quantity'),
+                    calculateRunsBtn: document.getElementById('calculate-runs'),
                     ingredientsDisplay: document.getElementById('ingredientsDisplay'),
-                    recipeWeight: document.getElementById('recipe-weight'),
-                    maxWeightDisplay: document.getElementById('max-weight'),
-                    weightProgress: document.getElementById('weight-progress'),
                     recipeLocation: document.getElementById('recipe-location'),
                     recipeCost: document.getElementById('recipe-cost'),
                     recipeInstructions: document.getElementById('recipe-instructions'),
                     
-                    // Inventory tab elements
-                    playerInventoryDisplay: document.getElementById('player-inventory'),
-                    inventorySearch: document.getElementById('inventorySearch'),
-                    currentWeightDisplay: document.getElementById('current-weight'),
-                    inventoryCapacityDisplay: document.getElementById('inventory-capacity'),
-                    inventoryProgressDisplay: document.getElementById('inventory-progress'),
+                    // Calculation elements
+                    runsCalculation: document.getElementById('runs-calculation'),
+                    totalRequirements: document.getElementById('total-requirements'),
+                    totalRuns: document.getElementById('total-runs'),
+                    showRouteBtn: document.getElementById('show-route-btn'),
+                    
+                    // Inventory elements
                     refreshInventoryBtn: document.getElementById('refresh-inventory'),
-                    
-                    // Settings tab elements
-                    maxInventoryWeightSetting: document.getElementById('max-inventory-weight'),
-                    refreshIntervalSetting: document.getElementById('refresh-interval'),
-                    notifyMissingItemsSetting: document.getElementById('notify-missing-items'),
-                    showItemDetailsSetting: document.getElementById('show-item-details'),
-                    autoCloseDelaySetting: document.getElementById('auto-close-delay'),
-                    saveSettingsBtn: document.getElementById('save-settings'),
-                    statusMessage: document.getElementById('status-message'),
-                    
-                    // Favorites elements
-                    favoriteButton: document.getElementById('favorite-recipe')
+                    statusMessage: document.getElementById('status-message')
                 };
-            }
-            
-            // Load settings from localStorage
-            loadSettings() {
-                const savedSettings = localStorage.getItem('blueprintBuddy_settings');
-                if (savedSettings) {
-                    try {
-                        const parsedSettings = JSON.parse(savedSettings);
-                        this.state.settings = { ...this.state.settings, ...parsedSettings };
-                    } catch (error) {
-                        console.error('Failed to parse saved settings:', error);
-                    }
-                }
-                
-                const savedMaxWeight = localStorage.getItem('blueprintBuddy_maxWeight');
-                if (savedMaxWeight) {
-                    this.state.maxWeight = parseInt(savedMaxWeight);
-                }
-                
-                // Update UI with loaded settings
-                this.updateSettingsUI();
-            }
-            
-            // Update the settings UI with current state values
-            updateSettingsUI() {
-                const { settings, maxWeight } = this.state;
-                const elements = this.elements;
-                
-                elements.maxInventoryWeightSetting.value = maxWeight;
-                elements.refreshIntervalSetting.value = settings.refreshInterval;
-                
-                if (elements.notifyMissingItemsSetting) {
-                    elements.notifyMissingItemsSetting.checked = settings.notifyMissingItems;
-                }
-                
-                if (elements.showItemDetailsSetting) {
-                    elements.showItemDetailsSetting.checked = settings.showItemDetails;
-                }
-                
-                if (elements.autoCloseDelaySetting) {
-                    elements.autoCloseDelaySetting.value = settings.autoCloseDelay;
-                }
-                
-                // Update display elements
-                elements.maxWeightDisplay.textContent = maxWeight;
-                elements.inventoryCapacityDisplay.textContent = maxWeight;
-            }
-            
-            // Save settings to localStorage
-            saveSettings() {
-                const elements = this.elements;
-                
-                this.state.maxWeight = parseInt(elements.maxInventoryWeightSetting.value) || 9000;
-                
-                const settingsToSave = {
-                    refreshInterval: parseInt(elements.refreshIntervalSetting.value) || 0,
-                    autoCloseDelay: parseInt(elements.autoCloseDelaySetting?.value || 0),
-                    notifyMissingItems: elements.notifyMissingItemsSetting?.checked || false,
-                    showItemDetails: elements.showItemDetailsSetting?.checked || true,
-                    favoriteRecipes: this.state.settings.favoriteRecipes || []
-                };
-                
-                localStorage.setItem('blueprintBuddy_settings', JSON.stringify(settingsToSave));
-                localStorage.setItem('blueprintBuddy_maxWeight', this.state.maxWeight.toString());
-                
-                this.state.settings = settingsToSave;
-                
-                // Update display elements
-                elements.maxWeightDisplay.textContent = this.state.maxWeight;
-                elements.inventoryCapacityDisplay.textContent = this.state.maxWeight;
-                
-                // Reconfigure auto-refresh if needed
-                this.setupAutoRefresh();
-                
-                this.updateStatusMessage('Settings saved successfully', 'success');
-            }
-            
-            // Populate recipe select dropdown with available recipes
-            populateRecipeSelect() {
-                const recipeSelect = this.elements.recipeSelect;
-                recipeSelect.innerHTML = '';
-                
-                // Add favorite recipes first if any
-                const favoriteRecipes = this.state.settings.favoriteRecipes || [];
-                if (favoriteRecipes.length > 0) {
-                    const favGroup = document.createElement('optgroup');
-                    favGroup.label = "Favorites";
-                    
-                    favoriteRecipes.forEach(recipeName => {
-                        if (this.recipes[recipeName]) {
-                            const option = document.createElement('option');
-                            option.value = recipeName;
-                            option.text = recipeName;
-                            favGroup.appendChild(option);
-                        }
-                    });
-                    
-                    recipeSelect.appendChild(favGroup);
-                    
-                    // Add a separator
-                    const separator = document.createElement('option');
-                    separator.disabled = true;
-                    separator.text = "───────────────";
-                    recipeSelect.appendChild(separator);
-                }
-                
-                // Add all recipes
-                Object.keys(this.recipes).sort().forEach(recipeName => {
-                    const option = document.createElement('option');
-                    option.value = recipeName;
-                    option.text = recipeName;
-                    recipeSelect.appendChild(option);
-                });
-                
-                // Select the current recipe
-                recipeSelect.value = this.state.selectedRecipe;
             }
             
             // Set up event handlers for UI elements
@@ -776,60 +374,27 @@
                     this.displayRecipeDetails();
                 });
                 
+                // Calculate runs button
+                elements.calculateRunsBtn.addEventListener('click', () => {
+                    this.calculateRunsNeeded();
+                });
+                
                 // Close button
                 elements.closeBtn.addEventListener('click', () => {
-                    this.updateStatusMessage('Closing application...');
-                    sendGameCommand({ type: 'close' });
+                    this.sendCommand({ type: 'close' });
                 });
                 
                 // Refresh inventory button
-                elements.refreshInventoryBtn.addEventListener('click', () => this.getInventoryData());
-                
-                // Inventory search
-                elements.inventorySearch.addEventListener('input', () => {
-                    this.state.searchTerm = elements.inventorySearch.value;
-                    this.displayInventory();
+                elements.refreshInventoryBtn.addEventListener('click', () => {
+                    this.getInventoryData();
                 });
                 
-                // Save settings button
-                elements.saveSettingsBtn.addEventListener('click', () => this.saveSettings());
-                
-                // Favorite recipe button if available
-                if (elements.favoriteButton) {
-                    elements.favoriteButton.addEventListener('click', () => this.toggleFavoriteRecipe());
-                }
-                
-                // ESC key handler for pinning
+                // ESC key handler
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
-                        sendGameCommand({ type: 'pin' });
+                        this.sendCommand({ type: 'pin' });
                     }
                 });
-            }
-            
-            // Toggle current recipe as favorite
-            toggleFavoriteRecipe() {
-                const recipeName = this.state.selectedRecipe;
-                const favorites = this.state.settings.favoriteRecipes || [];
-                
-                if (favorites.includes(recipeName)) {
-                    // Remove from favorites
-                    this.state.settings.favoriteRecipes = favorites.filter(name => name !== recipeName);
-                    this.elements.favoriteButton.classList.remove('active');
-                    this.elements.favoriteButton.innerHTML = '★ Add to Favorites';
-                } else {
-                    // Add to favorites
-                    favorites.push(recipeName);
-                    this.state.settings.favoriteRecipes = favorites;
-                    this.elements.favoriteButton.classList.add('active');
-                    this.elements.favoriteButton.innerHTML = '☆ Remove from Favorites';
-                }
-                
-                // Save updated favorites
-                localStorage.setItem('blueprintBuddy_settings', JSON.stringify(this.state.settings));
-                
-                // Refresh recipe select
-                this.populateRecipeSelect();
             }
             
             // Make the menu movable and resizable
@@ -838,7 +403,7 @@
                 const menuHeader = this.elements.menuHeader;
                 const resizeHandle = this.elements.resizeHandle;
                 
-                // Variables for drag and resize operations
+                // Variables for dragging
                 let isDragging = false;
                 let isResizing = false;
                 let startX, startY, startLeft, startTop, startWidth, startHeight;
@@ -901,7 +466,7 @@
             
             // Set up game client communication
             setupGameConnection() {
-                // Listen for messages from the game client
+                // Listen for messages from game client
                 window.addEventListener('message', (event) => {
                     try {
                         const data = JSON.parse(event.data);
@@ -910,149 +475,137 @@
                         console.error('Failed to process game data:', error);
                     }
                 });
+                
+                // Request initial inventory data
+                this.getInventoryData();
+            }
+            
+            // Send commands to the game client
+            sendCommand(command) {
+                try {
+                    console.log('Sending command to game:', command);
+                    window.parent.postMessage(JSON.stringify(command), '*');
+                } catch (error) {
+                    console.error('Failed to send command:', error);
+                }
             }
             
             // Process data received from the game client
             processGameData(data) {
                 console.log('Received game data:', data);
-                this.state.gameConnected = true;
-                this.state.lastUpdate = new Date();
+                this.isGameConnected = true;
                 
                 // Handle inventory data
                 if (data.inventory) {
                     try {
                         this.state.inventory = JSON.parse(data.inventory);
-                        this.displayInventory();
-                        this.displayRecipeDetails(); // Update recipe display with new inventory
+                        this.updateStatusMessage('Inventory data received');
                         
-                        // Show last update time
-                        const timeStr = this.state.lastUpdate.toLocaleTimeString();
-                        this.updateStatusMessage(`Inventory updated at ${timeStr}`, 'success');
+                        // If recipe is selected, update its display with new inventory data
+                        if (this.state.selectedRecipe) {
+                            this.displayRecipeDetails();
+                        }
                     } catch (e) {
                         console.error('Failed to parse inventory data:', e);
                         this.updateStatusMessage('Error parsing inventory data', 'error');
                     }
                 }
-                
-                // Handle weight data
-                if (data.weight !== undefined) {
-                    this.state.weight = parseInt(data.weight);
-                    this.elements.currentWeightDisplay.textContent = this.state.weight;
-                }
-                
-                // Handle max weight data from server if available
-                if (data.max_weight !== undefined) {
-                    this.state.maxWeight = parseInt(data.max_weight);
-                    this.elements.maxWeightDisplay.textContent = this.state.maxWeight;
-                    this.elements.inventoryCapacityDisplay.textContent = this.state.maxWeight;
-                    this.elements.maxInventoryWeightSetting.value = this.state.maxWeight;
-                }
-                
-                // Update UI elements
-                this.updateInventoryWeight();
             }
             
-            // Update status message with optional status type (success, error, warning)
-            updateStatusMessage(message, status = 'info') {
+            // Request inventory data from the game
+            getInventoryData() {
+                this.updateStatusMessage('Requesting inventory data...');
+                this.sendCommand({ 
+                    type: 'getNamedData', 
+                    keys: ['inventory'] 
+                });
+            }
+            
+            // Update status message
+            updateStatusMessage(message, type = 'info') {
                 const statusElem = this.elements.statusMessage;
                 if (!statusElem) return;
                 
                 statusElem.textContent = message;
                 
-                // Reset all status classes
-                statusElem.style.backgroundColor = '';
-                
-                // Apply color based on status
-                switch (status) {
-                    case 'success':
-                        statusElem.style.backgroundColor = 'rgba(46, 204, 113, 0.5)'; // Green
-                        break;
+                // Apply color based on message type
+                switch (type) {
                     case 'error':
                         statusElem.style.backgroundColor = 'rgba(231, 76, 60, 0.5)'; // Red
                         break;
                     case 'warning':
                         statusElem.style.backgroundColor = 'rgba(243, 156, 18, 0.5)'; // Orange
                         break;
+                    case 'success':
+                        statusElem.style.backgroundColor = 'rgba(46, 204, 113, 0.5)'; // Green
+                        break;
                     default:
                         statusElem.style.backgroundColor = 'rgba(22, 160, 133, 0.5)'; // Teal
                 }
             }
             
-            // Request inventory data from the game
-            getInventoryData() {
+            // Load recipes from external file
+            async loadRecipes() {
                 try {
-                    this.updateStatusMessage('Requesting inventory data...', 'warning');
-                    
-                    // Request specific data keys needed
-                    sendGameCommand({ 
-                        type: 'getNamedData', 
-                        keys: ['inventory', 'weight', 'max_weight'] 
-                    });
-                    
-                    // Set up auto-close if configured
-                    if (this.state.settings.autoCloseDelay > 0) {
-                        setTimeout(() => {
-                            sendGameCommand({ type: 'pin' });
-                        }, this.state.settings.autoCloseDelay * 1000);
+                    // Check if recipes are available from the external script
+                    if (typeof window.RECIPES_DATA === 'undefined') {
+                        throw new Error('Recipes data not found');
                     }
+                    
+                    // Populate recipe select dropdown
+                    this.populateRecipeSelect(window.RECIPES_DATA);
                 } catch (error) {
-                    console.error('Failed to get inventory data:', error);
-                    this.updateStatusMessage('Error requesting data: ' + error.message, 'error');
+                    console.error('Failed to load recipes:', error);
+                    this.updateStatusMessage('Failed to load recipes. Check console for details.', 'error');
                 }
             }
             
-            // Set up auto-refresh timer
-            setupAutoRefresh() {
-                // Clear existing timer
-                if (this.refreshTimer) {
-                    clearInterval(this.refreshTimer);
-                    this.refreshTimer = null;
-                }
+            // Populate recipe select dropdown
+            populateRecipeSelect(recipesData) {
+                const recipeSelect = this.elements.recipeSelect;
+                recipeSelect.innerHTML = '';
                 
-                // Set new timer if interval > 0
-                const interval = this.state.settings.refreshInterval;
-                if (interval > 0) {
-                    this.refreshTimer = setInterval(() => this.getInventoryData(), interval * 1000);
-                    console.log(`Auto-refresh set up for every ${interval} seconds`);
-                }
+                // Add default option
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.text = '-- Select a Recipe --';
+                recipeSelect.appendChild(defaultOption);
+                
+                // Add recipe options
+                Object.keys(recipesData).sort().forEach(recipeName => {
+                    const option = document.createElement('option');
+                    option.value = recipeName;
+                    option.text = recipeName;
+                    recipeSelect.appendChild(option);
+                });
             }
             
             // Display recipe details
             displayRecipeDetails() {
-                const recipe = this.recipes[this.state.selectedRecipe];
-                if (!recipe) return;
+                // Skip if no recipe selected
+                if (!this.state.selectedRecipe) {
+                    this.clearRecipeDisplay();
+                    return;
+                }
+                
+                const recipe = window.RECIPES_DATA[this.state.selectedRecipe];
+                if (!recipe) {
+                    this.clearRecipeDisplay();
+                    return;
+                }
+                
+                // Update recipe metadata
+                this.elements.recipeLocation.textContent = `Location: ${recipe.location || 'Unknown'}`;
+                this.elements.recipeCost.textContent = `Pays: ${(recipe.pays || 0).toLocaleString()}`;
+                this.elements.recipeInstructions.textContent = recipe.instructions || 'No instructions available.';
                 
                 // Clear ingredients display
                 this.elements.ingredientsDisplay.innerHTML = '';
                 
-                // Update recipe metadata
-                this.elements.recipeLocation.textContent = `Location: ${recipe.location}`;
-                this.elements.recipeCost.textContent = `Pays: ${recipe.pays.toLocaleString()}`;
-                this.elements.recipeInstructions.textContent = recipe.instructions;
-                
-                // Update favorite button if available
-                if (this.elements.favoriteButton) {
-                    const isFavorite = (this.state.settings.favoriteRecipes || []).includes(recipe.name);
-                    this.elements.favoriteButton.classList.toggle('active', isFavorite);
-                    this.elements.favoriteButton.innerHTML = isFavorite ? '☆ Remove from Favorites' : '★ Add to Favorites';
-                }
-                
-                let totalWeight = 0;
-                let canCraft = true;
-                
-                // Display each ingredient
+                // Show each ingredient
                 recipe.ingredients.forEach(([itemId, amount]) => {
-                    const itemData = this.items[itemId] || { 
-                        weight: 0, 
-                        displayName: itemId,
-                        description: "Unknown item" 
-                    };
-                    
                     const userHas = this.state.inventory[itemId] || 0;
-                    
-                    // Calculate ingredient weight
-                    const ingredientWeight = (itemData.weight * amount) / 100; // Divided by 100 to make numbers more manageable
-                    totalWeight += ingredientWeight;
+                    const itemData = window.ITEMS_DATA[itemId] || { displayName: itemId };
                     
                     // Create ingredient element
                     const ingredientDiv = document.createElement('div');
@@ -1063,132 +616,135 @@
                         ingredientDiv.classList.add('have');
                     } else if (userHas > 0) {
                         ingredientDiv.classList.add('partial');
-                        canCraft = false;
                     } else {
                         ingredientDiv.classList.add('missing');
-                        canCraft = false;
                     }
                     
-                    // Show proper item name and details if enabled
-                    const displayName = this.state.settings.showItemDetails ? 
-                        itemData.displayName : itemId;
-                    
+                    // Show ingredient info
                     ingredientDiv.innerHTML = `
-                        <span class="ingredient-name">${displayName}</span>
+                        <span class="ingredient-name">${itemData.displayName || itemId}</span>
                         <span class="ingredient-amount">${amount}</span>
                         <span class="inventory-have">${userHas}</span>
                     `;
                     
-                    // Show item description as tooltip if available and enabled
-                    if (this.state.settings.showItemDetails && itemData.description) {
-                        ingredientDiv.title = itemData.description;
-                    }
-                    
                     this.elements.ingredientsDisplay.appendChild(ingredientDiv);
                 });
                 
-                // Display recipe weight
-                this.elements.recipeWeight.textContent = totalWeight.toFixed(1);
-                
-                // Update progress bar
-                const weightPercentage = Math.min(100, (totalWeight / this.state.maxWeight) * 100);
-                this.elements.weightProgress.style.width = `${weightPercentage}%`;
-                
-                // Change color based on weight
-                if (weightPercentage > 90) {
-                    this.elements.weightProgress.style.backgroundColor = 'rgba(231, 76, 60, 0.8)'; // Red
-                } else if (weightPercentage > 75) {
-                    this.elements.weightProgress.style.backgroundColor = 'rgba(243, 156, 18, 0.8)'; // Orange
-                } else {
-                    this.elements.weightProgress.style.backgroundColor = 'rgba(22, 160, 133, 0.8)'; // Teal
-                }
-                
-                // Notify about missing items if enabled
-                if (!canCraft && this.state.settings.notifyMissingItems) {
-                    this.updateStatusMessage('Missing items needed for this recipe', 'warning');
-                }
+                // Hide calculation results if shown
+                this.elements.runsCalculation.style.display = 'none';
             }
             
-            // Display inventory items with search filtering
-            displayInventory() {
-                const searchTerm = this.state.searchTerm.toLowerCase();
-                const playerInventoryDisplay = this.elements.playerInventoryDisplay;
-                
-                // Clear display
-                playerInventoryDisplay.innerHTML = '';
-                
-                // Get sorted inventory items that match search
-                const items = Object.entries(this.state.inventory)
-                    .filter(([itemId, quantity]) => 
-                        !searchTerm || itemId.toLowerCase().includes(searchTerm))
-                    .sort((a, b) => a[0].localeCompare(b[0]));
-                
-                // Show message if no items
-                if (items.length === 0) {
-                    const noItemsDiv = document.createElement('div');
-                    noItemsDiv.className = 'no-results';
-                    noItemsDiv.textContent = searchTerm 
-                        ? 'No items match your search' 
-                        : 'No items in inventory';
-                    playerInventoryDisplay.appendChild(noItemsDiv);
+            // Clear recipe display
+            clearRecipeDisplay() {
+                this.elements.recipeLocation.textContent = 'Location: Select a recipe';
+                this.elements.recipeCost.textContent = 'Pays: $0';
+                this.elements.recipeInstructions.textContent = 'Select a recipe to see instructions.';
+                this.elements.ingredientsDisplay.innerHTML = `
+                    <div class="ingredient">
+                        <span class="ingredient-name">Select a recipe to view ingredients</span>
+                    </div>
+                `;
+                this.elements.runsCalculation.style.display = 'none';
+            }
+            
+            // Calculate runs needed for recipe quantity
+            calculateRunsNeeded() {
+                if (!this.state.selectedRecipe) {
+                    this.updateStatusMessage('Please select a recipe first', 'warning');
                     return;
                 }
                 
-                // Display each item
-                items.forEach(([itemId, quantity]) => {
-                    const itemData = this.items[itemId] || { weight: 0, displayName: itemId };
-                    const itemWeight = (itemData.weight * quantity) / 100;
+                const recipe = window.RECIPES_DATA[this.state.selectedRecipe];
+                if (!recipe) return;
+                
+                const quantity = parseInt(this.elements.recipeQuantity.value) || 1;
+                const requirementsDiv = this.elements.totalRequirements;
+                requirementsDiv.innerHTML = '';
+                
+                // Calculate requirements
+                let canCraftAll = true;
+                let totalRunsNeeded = 0;
+                
+                // Calculate weight of one recipe
+                let recipeWeight = 0;
+                let missingItems = [];
+                
+                recipe.ingredients.forEach(([itemId, amount]) => {
+                    const itemData = window.ITEMS_DATA[itemId] || { weight: 0, displayName: itemId };
+                    recipeWeight += (itemData.weight || 0) * amount / 100; // kg
                     
-                    // Create item display with proper name if available
-                    const displayName = this.state.settings.showItemDetails && itemData.displayName ? 
-                        itemData.displayName : itemId;
+                    const totalNeeded = amount * quantity;
+                    const userHas = this.state.inventory[itemId] || 0;
+                    const missing = Math.max(0, totalNeeded - userHas);
                     
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'inventory-item';
-                    itemDiv.innerHTML = `
-                        <span>${displayName}</span>
-                        <span>${quantity} (${itemWeight.toFixed(1)} kg)</span>
-                    `;
-                    
-                    // Add tooltip if enabled
-                    if (this.state.settings.showItemDetails && itemData.description) {
-                        itemDiv.title = itemData.description;
+                    if (missing > 0) {
+                        canCraftAll = false;
+                        missingItems.push({ itemId, missing, displayName: itemData.displayName || itemId });
                     }
                     
-                    playerInventoryDisplay.appendChild(itemDiv);
+                    // Show requirement
+                    const reqDiv = document.createElement('div');
+                    reqDiv.className = 'requirement-item';
+                    reqDiv.dataset.itemId = itemId;
+                    reqDiv.innerHTML = `
+                        <span>${itemData.displayName || itemId}</span>
+                        <span>${totalNeeded} (Have: ${userHas}, Need: ${missing})</span>
+                    `;
+                    requirementsDiv.appendChild(reqDiv);
+                    
+                    // Add click handler for route
+                    reqDiv.addEventListener('click', () => {
+                        if (missing > 0) {
+                            this.showItemRoute(itemId, missing);
+                        }
+                    });
                 });
+                
+                // Calculate how many recipes fit in one trip (approx 9000 weight capacity)
+                const maxWeight = 9000; // Default max weight
+                const recipesPerTrip = Math.floor(maxWeight / recipeWeight);
+                totalRunsNeeded = Math.ceil(quantity / recipesPerTrip);
+                
+                // Display results
+                this.elements.totalRuns.textContent = canCraftAll ? 
+                    "0 (You have all materials)" : `${totalRunsNeeded}`;
+                
+                // Show/hide route button
+                this.elements.showRouteBtn.style.display = canCraftAll ? 'none' : 'block';
+                
+                // Add route button handler
+                this.elements.showRouteBtn.onclick = () => {
+                    if (missingItems.length > 0) {
+                        // Just show route for first missing item for now
+                        this.showItemRoute(missingItems[0].itemId, missingItems[0].missing);
+                    }
+                };
+                
+                // Show calculation results
+                this.elements.runsCalculation.style.display = 'block';
             }
             
-            // Update inventory weight calculation and display
-            updateInventoryWeight() {
-                let totalWeight = 0;
+            // Show route for an item (placeholder)
+            showItemRoute(itemId, amountNeeded) {
+                this.updateStatusMessage(`Route for ${itemId} will be implemented later`, 'info');
+                console.log(`Show route for ${itemId}, need ${amountNeeded}`);
                 
-                // Calculate total inventory weight
-                for (const [itemId, quantity] of Object.entries(this.state.inventory)) {
-                    const itemData = this.items[itemId] || { weight: 0 };
-                    totalWeight += (itemData.weight * quantity) / 100;
-                }
+                // For testing, set a random waypoint
+                this.sendCommand({ 
+                    type: 'setWaypoint', 
+                    x: Math.floor(Math.random() * 1000), 
+                    y: Math.floor(Math.random() * 1000) 
+                });
                 
-                // Update state and display
-                this.state.weight = Math.round(totalWeight);
-                this.elements.currentWeightDisplay.textContent = this.state.weight;
-                
-                // Update progress bar
-                const weightPercentage = Math.min(100, (this.state.weight / this.state.maxWeight) * 100);
-                this.elements.inventoryProgressDisplay.style.width = `${weightPercentage}%`;
-                
-                // Change color based on how full inventory is
-                if (weightPercentage > 90) {
-                    this.elements.inventoryProgressDisplay.style.backgroundColor = 'rgba(231, 76, 60, 0.8)'; // Red
-                } else if (weightPercentage > 75) {
-                    this.elements.inventoryProgressDisplay.style.backgroundColor = 'rgba(243, 156, 18, 0.8)'; // Orange
-                } else {
-                    this.elements.inventoryProgressDisplay.style.backgroundColor = 'rgba(22, 160, 133, 0.8)'; // Teal
-                }
+                // Show notification
+                this.sendCommand({
+                    type: 'notification',
+                    text: `Route set for ${itemId} (placeholder)`
+                });
             }
         }
 
-        // Initialize app when document is loaded
+        // Initialize app when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             // Create app instance
             const app = new BlueprintBuddy();
@@ -1201,4 +757,4 @@
         });
     </script>
 </body>
-</html><!DOCTYPE html>
+</html>
