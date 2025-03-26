@@ -264,6 +264,94 @@
         .server-btn.active {
             background-color: rgba(46, 204, 113, 0.8);
         }
+        /* Storage selector */
+        .storage-selector {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .storage-btn {
+            flex: 1;
+            margin: 0 2px;
+            text-align: center;
+            font-size: 0.8em;
+            padding: 5px;
+        }
+        .storage-btn.active {
+            background-color: rgba(46, 204, 113, 0.8);
+        }
+        /* Loading indicator */
+        .loading-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: white;
+        }
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        /* Storage info display */
+        .storage-info {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 5px 8px;
+            border-radius: 4px;
+            margin-top: 5px;
+            color: white;
+            font-size: 0.8em;
+        }
+        .storage-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+        .storage-name {
+            font-weight: bold;
+            color: #3498db;
+        }
+        /* Recipe filter */
+        .recipe-filter {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .recipe-search {
+            flex: 2;
+        }
+        .recipe-category {
+            flex: 1;
+            margin-left: 5px;
+        }
+        .recipe-category-label {
+            color: white;
+            font-size: 0.8em;
+            margin-bottom: 2px;
+        }
+        /* Recipe file loader */
+        .recipe-file-input {
+            display: none;
+        }
+        .recipe-file-label {
+            display: inline-block;
+            background-color: rgba(41, 128, 185, 0.8);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 5px;
+        }
+        .recipe-file-label:hover {
+            background-color: rgba(41, 128, 185, 1);
+        }
     </style>
 </head>
 <body>
@@ -281,6 +369,13 @@
         
         <!-- Recipes Tab -->
         <div id="recipes-tab" class="tab-content active">
+            <div class="recipe-filter">
+                <input type="text" id="recipe-search" class="recipe-search" placeholder="Search recipes...">
+                <select id="recipe-category" class="recipe-category">
+                    <option value="all">All Categories</option>
+                </select>
+            </div>
+            
             <select id="recipeSelect">
                 <option value="">Loading recipes...</option>
             </select>
@@ -313,6 +408,9 @@
             <div class="instruction" id="recipe-instructions">
                 Select a recipe to see instructions.
             </div>
+            
+            <label for="recipe-file" class="recipe-file-label">Import Recipe JSON</label>
+            <input type="file" id="recipe-file" class="recipe-file-input" accept=".json">
         </div>
         
         <!-- Inventory Tab -->
@@ -327,6 +425,28 @@
             <div class="server-selector">
                 <button class="server-btn active" data-server="main">Server 1</button>
                 <button class="server-btn" data-server="beta">Server 2 (Beta)</button>
+            </div>
+            
+            <div class="storage-selector">
+                <button class="storage-btn active" data-storage="all">All Storage</button>
+                <button class="storage-btn" data-storage="player">Player Only</button>
+                <button class="storage-btn" data-storage="trainyard">Trainyard</button>
+                <button class="storage-btn" data-storage="trailer">Trailer</button>
+            </div>
+            
+            <div id="storage-summary" class="storage-info" style="display: none;">
+                <div class="storage-detail">
+                    <span class="storage-name">Trailer:</span>
+                    <span id="trailer-type">None</span>
+                </div>
+                <div class="storage-detail">
+                    <span class="storage-name">Capacity:</span>
+                    <span id="trailer-capacity">0 kg</span>
+                </div>
+                <div class="storage-detail">
+                    <span class="storage-name">Available Storages:</span>
+                    <span id="available-storages">Player, Trainyard</span>
+                </div>
             </div>
             
             <div id="inventory-display" class="ingredients-list" style="margin-top: 10px;"></div>
@@ -364,6 +484,11 @@
                 <input type="checkbox" id="auto-refresh" checked style="width: auto;">
             </div>
             
+            <div class="quantity-selector">
+                <label style="color: white; flex: 1;">Combine All Storages:</label>
+                <input type="checkbox" id="combine-storages" checked style="width: auto;">
+            </div>
+            
             <button id="reset-settings">Reset to Defaults</button>
             <button id="test-api" style="margin-top: 10px; background-color: rgba(41, 128, 185, 0.8);">Test API Connection</button>
             <button id="debug-button" style="margin-top: 10px; background-color: rgba(142, 68, 173, 0.8);">Debug Info</button>
@@ -374,7 +499,7 @@
     
     <!-- TT API Client Script -->
     <script>
-        // API Integration for Transport Tycoon
+        // Enhanced API Client for Transport Tycoon
         class TTApiClient {
             constructor(privateKey, userId, serverId = "main") {
                 this.privateKey = privateKey;
@@ -385,7 +510,17 @@
                     "beta": "tycoon-njyvop.users.cfx.re/status"
                 };
                 this.baseUrl = `https://${this.serverUrls[serverId]}`;
+                this.cdnUrl = "https://ttycoon.eu/api/v1";
                 this.remainingCharges = null;
+                
+                // Cache for item and trailer data
+                this.cachedItemData = null;
+                this.cachedTrailerConfig = null;
+                this.userDetails = {
+                    vrpId: userId,
+                    trailer: null,
+                    trailerCapacity: 300 // Default capacity
+                };
             }
 
             // Set the server ID and update base URL
@@ -422,6 +557,11 @@
                     if (response && response.code === "200" && response.data) {
                         // Process inventory from advanced data
                         if (response.data.inventory) {
+                            // Store user's trailer info if available
+                            if (response.data.trailer) {
+                                this.userDetails.trailer = response.data.trailer;
+                            }
+                            
                             return this.processInventoryData(response.data.inventory);
                         }
                     }
@@ -430,6 +570,11 @@
                     const basicResponse = await this.makeRequest(`/data/${this.userId}`);
                     
                     if (basicResponse && basicResponse.code === "200" && basicResponse.data) {
+                        // Store user's trailer info if available
+                        if (basicResponse.data.trailer) {
+                            this.userDetails.trailer = basicResponse.data.trailer;
+                        }
+                        
                         if (basicResponse.data.inventory) {
                             return this.processInventoryData(basicResponse.data.inventory);
                         }
@@ -442,12 +587,41 @@
                 }
             }
 
-            // Get user's vehicle storage data (trunks)
+            // Get user's data to find equipped trailer
+            async getUserData() {
+                try {
+                    const response = await this.makeRequest(`/data/${this.userId}`);
+                    
+                    if (response && response.code === "200" && response.data) {
+                        // Extract any useful user details from the response
+                        // Specifically looking for trailer information
+                        if (response.data.vehicles && response.data.vehicles.trailer) {
+                            this.userDetails.trailer = response.data.vehicles.trailer;
+                        }
+                        
+                        return response.data;
+                    }
+                    
+                    return null;
+                } catch (error) {
+                    console.error('Failed to get user data:', error);
+                    throw error;
+                }
+            }
+
+            // Get user's vehicle trunks (including trailers)
             async getUserTrunks() {
                 try {
                     const response = await this.makeRequest(`/trunks/${this.userId}`);
                     
                     if (response && response.code === "200" && response.trunks) {
+                        // Process trunk data and update userDetails with trailer info
+                        response.trunks.forEach(trunk => {
+                            if (trunk.type === "trailer" && trunk.vehicle) {
+                                this.userDetails.trailer = trunk.vehicle;
+                            }
+                        });
+                        
                         return response.trunks;
                     }
                     
@@ -458,7 +632,183 @@
                 }
             }
 
-            // Get item information from the API
+            // Get user's available storages
+            async getUserStorages() {
+                try {
+                    const response = await this.makeRequest(`/storages/${this.userId}`);
+                    
+                    if (response && response.code === "200" && response.storages) {
+                        return response.storages;
+                    }
+                    
+                    return [];
+                } catch (error) {
+                    console.error('Failed to get user storages:', error);
+                    throw error;
+                }
+            }
+
+            // Get contents of a specific chest (storage)
+            async getChestContents(chestName) {
+                try {
+                    const response = await this.makeRequest(`/chest/${chestName}`);
+                    
+                    if (response && response.code === "200" && response.data) {
+                        return response.data;
+                    }
+                    
+                    return {};
+                } catch (error) {
+                    console.error(`Failed to get chest contents for ${chestName}:`, error);
+                    throw error;
+                }
+            }
+
+            // Get trainyard storage contents
+            async getTrainyardStorage() {
+                // Common storage names
+                const trainyardStorageName = `self_storage:${this.userId}:ty:chest`;
+                
+                try {
+                    return await this.getChestContents(trainyardStorageName);
+                } catch (error) {
+                    console.error('Failed to get trainyard storage:', error);
+                    return {};
+                }
+            }
+
+            // Get trailer storage contents
+            async getTrailerStorage() {
+                // First make sure we have the trailer info
+                if (!this.userDetails.trailer) {
+                    try {
+                        // Try to get trailer info from trunks or user data
+                        await this.getUserTrunks();
+                        
+                        if (!this.userDetails.trailer) {
+                            await this.getUserData();
+                        }
+                    } catch (e) {
+                        console.error('Could not determine user trailer:', e);
+                    }
+                }
+                
+                // If we still don't have trailer info, return empty
+                if (!this.userDetails.trailer) {
+                    console.warn('No trailer found for user');
+                    return {};
+                }
+                
+                // Format the trailer chest name according to the pattern
+                const trailerChestName = `u${this.userDetails.vrpId}veh_trailer_${this.userDetails.trailer}`;
+                
+                try {
+                    return await this.getChestContents(trailerChestName);
+                } catch (error) {
+                    console.error('Failed to get trailer storage:', error);
+                    return {};
+                }
+            }
+
+            // Get all trailer configurations and capacities from the CDN API
+            async getTrailerConfigs() {
+                // Use cached data if available
+                if (this.cachedTrailerConfig) {
+                    return this.cachedTrailerConfig;
+                }
+                
+                try {
+                    // Use the CDN API for trailer configs
+                    const response = await fetch(`${this.cdnUrl}/serverdata/trailerconfig`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Failed to get trailer configs: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    this.cachedTrailerConfig = data;
+                    
+                    // Update our trailer capacity if we know our trailer
+                    if (this.userDetails.trailer) {
+                        const trailerInfo = data.find(t => t.id === this.userDetails.trailer);
+                        if (trailerInfo && trailerInfo.capacity) {
+                            this.userDetails.trailerCapacity = trailerInfo.capacity;
+                        }
+                    }
+                    
+                    return data;
+                } catch (error) {
+                    console.error('Failed to get trailer configs:', error);
+                    return [];
+                }
+            }
+
+            // Get detailed item information from the CDN API
+            async getItemInfoBatch(itemIds = []) {
+                // If no specific items requested, get all items
+                if (itemIds.length === 0) {
+                    return await this.getAllItemInfo();
+                }
+                
+                try {
+                    // Get item info for each requested ID
+                    const itemsData = {};
+                    
+                    for (const itemId of itemIds) {
+                        const response = await fetch(`${this.cdnUrl}/serverdata/iteminfo?id=${itemId}`, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            itemsData[itemId] = data;
+                        }
+                    }
+                    
+                    return itemsData;
+                } catch (error) {
+                    console.error('Failed to get batch item info:', error);
+                    return {};
+                }
+            }
+
+            // Get information for all items from the CDN API
+            async getAllItemInfo() {
+                // Use cached data if available
+                if (this.cachedItemData) {
+                    return this.cachedItemData;
+                }
+                
+                try {
+                    const response = await fetch(`${this.cdnUrl}/serverdata/iteminfo`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Failed to get all item info: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    this.cachedItemData = data;
+                    return data;
+                } catch (error) {
+                    console.error('Failed to get all item info:', error);
+                    return {};
+                }
+            }
+
+            // Get detailed info for a specific item from server API
             async getItemInfo(itemId) {
                 try {
                     const response = await this.makeRequest(`/iteminfo/${itemId}`);
@@ -587,6 +937,90 @@
                 }
             }
 
+            // Get user's current trailer capacity
+            async getTrailerCapacity() {
+                // If we don't have trailer info yet, try to get it
+                if (!this.userDetails.trailer) {
+                    try {
+                        await this.getUserTrunks();
+                    } catch (e) {
+                        console.error('Could not get user trunks:', e);
+                    }
+                }
+                
+                // If we still don't have the trailer, return default
+                if (!this.userDetails.trailer) {
+                    return this.userDetails.trailerCapacity;
+                }
+                
+                // If we already know the capacity, return it
+                if (this.userDetails.trailerCapacity !== 300) {
+                    return this.userDetails.trailerCapacity;
+                }
+                
+                // Try to get capacity from trailer config
+                try {
+                    const trailerConfigs = await this.getTrailerConfigs();
+                    const trailerInfo = trailerConfigs.find(t => t.id === this.userDetails.trailer);
+                    
+                    if (trailerInfo && trailerInfo.capacity) {
+                        this.userDetails.trailerCapacity = trailerInfo.capacity;
+                        return trailerInfo.capacity;
+                    }
+                } catch (e) {
+                    console.error('Could not get trailer capacity:', e);
+                }
+                
+                // Return default if all else fails
+                return this.userDetails.trailerCapacity;
+            }
+
+            // Combine inventory from all sources (player, trainyard, trailer)
+            async getAllInventory() {
+                try {
+                    // Get player inventory
+                    const playerInventory = await this.getUserInventory();
+                    
+                    // Get trainyard storage
+                    const trainyardStorage = await this.getTrainyardStorage();
+                    
+                    // Get trailer storage
+                    const trailerStorage = await this.getTrailerStorage();
+                    
+                    // Combine all inventories
+                    const combinedInventory = { ...playerInventory };
+                    
+                    // Process trainyard items
+                    for (const [itemId, itemData] of Object.entries(trainyardStorage)) {
+                        const baseItemId = itemId.split('|')[0];
+                        const amount = itemData.amount || 0;
+                        
+                        if (combinedInventory[baseItemId]) {
+                            combinedInventory[baseItemId] += amount;
+                        } else {
+                            combinedInventory[baseItemId] = amount;
+                        }
+                    }
+                    
+                    // Process trailer items
+                    for (const [itemId, itemData] of Object.entries(trailerStorage)) {
+                        const baseItemId = itemId.split('|')[0];
+                        const amount = itemData.amount || 0;
+                        
+                        if (combinedInventory[baseItemId]) {
+                            combinedInventory[baseItemId] += amount;
+                        } else {
+                            combinedInventory[baseItemId] = amount;
+                        }
+                    }
+                    
+                    return combinedInventory;
+                } catch (error) {
+                    console.error('Failed to get combined inventory:', error);
+                    return {};
+                }
+            }
+
             // Check if API client is properly configured
             isConfigured() {
                 return Boolean(this.privateKey && this.userId && this.baseUrl);
@@ -682,8 +1116,10 @@
                     settings: {
                         trailerCapacity: 300, // kg
                         includeInventory: true,
-                        autoRefresh: true
-                    }
+                        autoRefresh: true,
+                        combineStorages: true
+                    },
+                    recipeCategories: []
                 };
                 
                 // References to DOM elements
@@ -697,9 +1133,6 @@
                 
                 // Refresh timer
                 this.refreshTimer = null;
-                
-                // Active fetch controllers for API calls
-                this.fetchControllers = {};
             }
             
             // Initialize the app
@@ -751,6 +1184,9 @@
                     recipeLocation: document.getElementById('recipe-location'),
                     recipeCost: document.getElementById('recipe-cost'),
                     recipeInstructions: document.getElementById('recipe-instructions'),
+                    recipeSearch: document.getElementById('recipe-search'),
+                    recipeCategory: document.getElementById('recipe-category'),
+                    recipeFile: document.getElementById('recipe-file'),
                     
                     // Calculation elements
                     runsCalculation: document.getElementById('runs-calculation'),
@@ -764,6 +1200,11 @@
                     inventoryDisplay: document.getElementById('inventory-display'),
                     apiCharges: document.getElementById('api-charges'),
                     serverButtons: document.querySelectorAll('.server-btn'),
+                    storageButtons: document.querySelectorAll('.storage-btn'),
+                    storageSummary: document.getElementById('storage-summary'),
+                    trailerType: document.getElementById('trailer-type'),
+                    trailerCapacityDisplay: document.getElementById('trailer-capacity'),
+                    availableStorages: document.getElementById('available-storages'),
                     
                     // API Settings elements
                     apiKey: document.getElementById('api-key'),
@@ -776,6 +1217,7 @@
                     trailerCapacity: document.getElementById('trailer-capacity'),
                     includeInventory: document.getElementById('include-inventory'),
                     autoRefresh: document.getElementById('auto-refresh'),
+                    combineStorages: document.getElementById('combine-storages'),
                     resetSettings: document.getElementById('reset-settings'),
                     debugButton: document.getElementById('debug-button')
                 };
@@ -801,6 +1243,21 @@
                 elements.recipeSelect.addEventListener('change', () => {
                     this.state.selectedRecipe = elements.recipeSelect.value;
                     this.displayRecipeDetails();
+                });
+                
+                // Recipe search
+                elements.recipeSearch.addEventListener('input', () => {
+                    this.filterRecipes();
+                });
+                
+                // Recipe category filter
+                elements.recipeCategory.addEventListener('change', () => {
+                    this.filterRecipes();
+                });
+                
+                // Recipe file import
+                elements.recipeFile.addEventListener('change', (e) => {
+                    this.importRecipeFile(e);
                 });
                 
                 // Calculate runs button
@@ -842,6 +1299,18 @@
                     });
                 });
                 
+                // Storage selection buttons
+                elements.storageButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        // Update active state on buttons
+                        elements.storageButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        
+                        // Refresh data with selected storage
+                        this.getInventoryData();
+                    });
+                });
+                
                 // Save API settings button
                 elements.saveApiSettings.addEventListener('click', () => {
                     this.saveApiSettings();
@@ -867,6 +1336,12 @@
                     this.state.settings.autoRefresh = elements.autoRefresh.checked;
                     this.saveSettings();
                     this.setupAutoRefresh();
+                });
+                
+                elements.combineStorages.addEventListener('change', () => {
+                    this.state.settings.combineStorages = elements.combineStorages.checked;
+                    this.saveSettings();
+                    this.getInventoryData();
                 });
                 
                 // Reset settings button
@@ -988,7 +1463,7 @@
             }
             
             // Initialize data
-            initializeData() {
+            async initializeData() {
                 // Load basic item data
                 this.state.itemsData = [
                     { id: "sand", name: "Sand", weight: 0.8, category: "Resource" },
@@ -1000,6 +1475,12 @@
                     { id: "crafted_brick", name: "Brick", weight: 1.2, category: "Crafted" }
                 ];
                 
+                // Extract recipe categories
+                this.extractRecipeCategories();
+                
+                // Populate category select
+                this.populateCategorySelect();
+                
                 // Populate recipe select
                 this.populateRecipeSelect();
                 
@@ -1008,6 +1489,105 @@
                 
                 // Set active server button
                 this.setActiveServerButton();
+                
+                // Load all item data from API if connected
+                if (this.apiClient && this.state.apiSettings.isConnected) {
+                    await this.loadAllItemData();
+                }
+            }
+            
+            // Extract recipe categories from loaded recipes
+            extractRecipeCategories() {
+                const categories = new Set();
+                
+                for (const recipeName in this.state.recipesData) {
+                    const recipe = this.state.recipesData[recipeName];
+                    if (recipe.category) {
+                        categories.add(recipe.category);
+                    }
+                }
+                
+                this.state.recipeCategories = Array.from(categories);
+            }
+            
+            // Populate the category select dropdown
+            populateCategorySelect() {
+                const categorySelect = this.elements.recipeCategory;
+                
+                // Keep the "All Categories" option
+                categorySelect.innerHTML = '<option value="all">All Categories</option>';
+                
+                // Add all categories
+                this.state.recipeCategories.sort().forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.text = category.charAt(0).toUpperCase() + category.slice(1); // Capitalize
+                    categorySelect.appendChild(option);
+                });
+            }
+            
+            // Filter recipes based on search and category
+            filterRecipes() {
+                const searchText = this.elements.recipeSearch.value.toLowerCase();
+                const selectedCategory = this.elements.recipeCategory.value;
+                
+                // Get all recipes
+                const recipes = this.state.recipesData;
+                
+                // Create a filtered list based on search and category
+                const filteredRecipes = {};
+                
+                for (const recipeName in recipes) {
+                    const recipe = recipes[recipeName];
+                    
+                    // Check if recipe matches search
+                    const matchesSearch = recipeName.toLowerCase().includes(searchText);
+                    
+                    // Check if recipe matches category
+                    const matchesCategory = selectedCategory === 'all' || recipe.category === selectedCategory;
+                    
+                    // Add to filtered list if both match
+                    if (matchesSearch && matchesCategory) {
+                        filteredRecipes[recipeName] = recipe;
+                    }
+                }
+                
+                // Populate the recipe select with the filtered list
+                this.populateRecipeSelect(filteredRecipes);
+            }
+            
+            // Import recipe JSON file
+            async importRecipeFile(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                try {
+                    const text = await file.text();
+                    const recipeData = JSON.parse(text);
+                    
+                    // Check if it's a valid recipe file
+                    if (recipeData && typeof recipeData === 'object') {
+                        // Merge with existing recipes
+                        this.state.recipesData = { ...this.state.recipesData, ...recipeData };
+                        
+                        // Extract categories and update select
+                        this.extractRecipeCategories();
+                        this.populateCategorySelect();
+                        
+                        // Populate recipe select
+                        this.populateRecipeSelect();
+                        
+                        this.updateStatusMessage(`Imported ${Object.keys(recipeData).length} recipes from file`, 'success');
+                    } else {
+                        this.updateStatusMessage('Invalid recipe file format', 'error');
+                    }
+                } catch (error) {
+                    console.error('Failed to import recipe file:', error);
+                    this.updateStatusMessage('Failed to import recipe file: ' + error.message, 'error');
+                }
+                
+                // Reset the file input
+                event.target.value = '';
             }
             
             // Initialize the API client
@@ -1121,7 +1701,7 @@
                         this.state.apiSettings.isConnected = true;
                         this.updateApiStatus(true);
                         this.updateApiCharges(charges);
-                        this.updateApiStatusMessage('API connection successful! Charges: ' + charges, 'success');
+                        this.updateApiStatusMessage('API connected successfully! Charges: ' + charges, 'success');
                         
                         // Save updated connection status
                         localStorage.setItem('blueprintBuddyApiSettings', JSON.stringify(this.state.apiSettings));
@@ -1202,6 +1782,8 @@
                     this.elements.trailerCapacity.value = this.state.settings.trailerCapacity;
                     this.elements.includeInventory.checked = this.state.settings.includeInventory;
                     this.elements.autoRefresh.checked = this.state.settings.autoRefresh;
+                    this.elements.combineStorages.checked = this.state.settings.combineStorages !== undefined ? 
+                        this.state.settings.combineStorages : true;
                     
                     // Setup auto-refresh if enabled
                     this.setupAutoRefresh();
@@ -1224,13 +1806,15 @@
                 this.state.settings = {
                     trailerCapacity: 300,
                     includeInventory: true,
-                    autoRefresh: true
+                    autoRefresh: true,
+                    combineStorages: true
                 };
                 
                 // Update DOM elements
                 this.elements.trailerCapacity.value = this.state.settings.trailerCapacity;
                 this.elements.includeInventory.checked = this.state.settings.includeInventory;
                 this.elements.autoRefresh.checked = this.state.settings.autoRefresh;
+                this.elements.combineStorages.checked = this.state.settings.combineStorages;
                 
                 // Save to localStorage
                 this.saveSettings();
@@ -1305,31 +1889,25 @@
             getInventoryData() {
                 // Try API first if configured
                 if (this.apiClient && this.state.apiSettings.isConnected) {
-                    this.updateStatusMessage('Requesting inventory from TT API...');
+                    // Check which storage type is selected
+                    const activeStorageBtn = document.querySelector('.storage-btn.active');
+                    const storageType = activeStorageBtn ? activeStorageBtn.getAttribute('data-storage') : 'all';
                     
-                    this.apiClient.getUserInventory()
-                        .then(inventory => {
-                            this.state.inventory = inventory;
-                            this.updateStatusMessage('Inventory loaded from API', 'success');
-                            
-                            // Update charges display
-                            if (this.apiClient.remainingCharges !== null) {
-                                this.updateApiCharges(this.apiClient.remainingCharges);
-                            }
-                            
-                            // Display inventory and update recipe details
-                            this.displayInventory();
-                            if (this.state.selectedRecipe) {
-                                this.displayRecipeDetails();
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Failed to get inventory from API:', error);
-                            this.updateStatusMessage('API error: ' + error.message + '. Trying game data...', 'warning');
-                            
-                            // Fall back to game data
-                            this.getGameInventoryData();
-                        });
+                    // Check if we should combine all storages
+                    const combineAll = this.state.settings.combineStorages;
+                    
+                    // Load appropriate storage data
+                    if (storageType === 'all' || combineAll) {
+                        this.loadAllStorageData();
+                    } else if (storageType === 'player') {
+                        this.loadPlayerInventory();
+                    } else if (storageType === 'trainyard') {
+                        this.loadTrainyardStorage();
+                    } else if (storageType === 'trailer') {
+                        this.loadTrailerStorage();
+                    } else {
+                        this.loadAllStorageData();
+                    }
                 } else {
                     // Use game data if API not configured
                     this.getGameInventoryData();
@@ -1343,6 +1921,360 @@
                     type: 'getNamedData', 
                     keys: ['inventory'] 
                 });
+            }
+            
+            // Load and display both inventory and storage data
+            async loadAllStorageData() {
+                if (!this.apiClient || !this.state.apiSettings.isConnected) {
+                    this.updateStatusMessage('API not connected. Cannot load storage data.', 'warning');
+                    return;
+                }
+                
+                this.updateStatusMessage('Loading inventory & storage data...');
+                
+                try {
+                    // Show loading indicator
+                    this.elements.inventoryDisplay.innerHTML = `
+                        <div class="loading-indicator">
+                            <div class="spinner"></div>
+                            <p>Loading data from all storages...</p>
+                        </div>
+                    `;
+                    
+                    // Get combined inventory from all sources
+                    const combinedInventory = await this.apiClient.getAllInventory();
+                    
+                    if (combinedInventory && Object.keys(combinedInventory).length > 0) {
+                        // Update our state
+                        this.state.inventory = combinedInventory;
+                        
+                        // Update the display
+                        this.displayInventory();
+                        this.updateStatusMessage('All storage data loaded successfully', 'success');
+                        
+                        // Update storage info display
+                        await this.updateStorageInfo();
+                        
+                        // Update recipe display if needed
+                        if (this.state.selectedRecipe) {
+                            this.displayRecipeDetails();
+                        }
+                        
+                        // Show notification about charges if available
+                        if (this.apiClient.remainingCharges !== null) {
+                            this.updateApiCharges(this.apiClient.remainingCharges);
+                        }
+                    } else {
+                        this.updateStatusMessage('No storage data found', 'warning');
+                    }
+                } catch (error) {
+                    console.error('Failed to load storage data:', error);
+                    this.updateStatusMessage('Error loading storage data: ' + error.message, 'error');
+                }
+            }
+            
+            // Load player inventory only
+            async loadPlayerInventory() {
+                if (!this.apiClient || !this.state.apiSettings.isConnected) {
+                    this.updateStatusMessage('API not connected. Cannot load player inventory.', 'warning');
+                    return;
+                }
+                
+                this.updateStatusMessage('Loading player inventory...');
+                
+                try {
+                    // Show loading indicator
+                    this.elements.inventoryDisplay.innerHTML = `
+                        <div class="loading-indicator">
+                            <div class="spinner"></div>
+                            <p>Loading player inventory...</p>
+                        </div>
+                    `;
+                    
+                    const inventory = await this.apiClient.getUserInventory();
+                    
+                    if (inventory && Object.keys(inventory).length > 0) {
+                        this.state.inventory = inventory;
+                        this.displayInventory();
+                        this.updateStatusMessage('Player inventory loaded', 'success');
+                        
+                        // Update storage info display
+                        await this.updateStorageInfo();
+                        
+                        // Update API charges display
+                        if (this.apiClient.remainingCharges !== null) {
+                            this.updateApiCharges(this.apiClient.remainingCharges);
+                        }
+                    } else {
+                        this.updateStatusMessage('No player inventory found', 'warning');
+                    }
+                } catch (error) {
+                    console.error('Failed to load player inventory:', error);
+                    this.updateStatusMessage('Error loading player inventory: ' + error.message, 'error');
+                }
+            }
+            
+            // Load trainyard storage only
+            async loadTrainyardStorage() {
+                if (!this.apiClient || !this.state.apiSettings.isConnected) {
+                    this.updateStatusMessage('API not connected. Cannot load trainyard storage.', 'warning');
+                    return;
+                }
+                
+                this.updateStatusMessage('Loading trainyard storage...');
+                
+                try {
+                    // Show loading indicator
+                    this.elements.inventoryDisplay.innerHTML = `
+                        <div class="loading-indicator">
+                            <div class="spinner"></div>
+                            <p>Loading trainyard storage...</p>
+                        </div>
+                    `;
+                    
+                    const storage = await this.apiClient.getTrainyardStorage();
+                    
+                    if (storage && Object.keys(storage).length > 0) {
+                        // Process storage into inventory format
+                        const inventory = {};
+                        
+                        for (const [itemId, itemData] of Object.entries(storage)) {
+                            const baseItemId = itemId.split('|')[0];
+                            inventory[baseItemId] = itemData.amount || 0;
+                        }
+                        
+                        this.state.inventory = inventory;
+                        this.displayInventory();
+                        this.updateStatusMessage('Trainyard storage loaded', 'success');
+                        
+                        // Update storage info display
+                        await this.updateStorageInfo();
+                        
+                        // Update API charges display
+                        if (this.apiClient.remainingCharges !== null) {
+                            this.updateApiCharges(this.apiClient.remainingCharges);
+                        }
+                    } else {
+                        this.updateStatusMessage('No trainyard storage found', 'warning');
+                    }
+                } catch (error) {
+                    console.error('Failed to load trainyard storage:', error);
+                    this.updateStatusMessage('Error loading trainyard storage: ' + error.message, 'error');
+                }
+            }
+            
+            // Load trailer storage only
+            async loadTrailerStorage() {
+                if (!this.apiClient || !this.state.apiSettings.isConnected) {
+                    this.updateStatusMessage('API not connected. Cannot load trailer storage.', 'warning');
+                    return;
+                }
+                
+                this.updateStatusMessage('Loading trailer storage...');
+                
+                try {
+                    // Show loading indicator
+                    this.elements.inventoryDisplay.innerHTML = `
+                        <div class="loading-indicator">
+                            <div class="spinner"></div>
+                            <p>Loading trailer storage...</p>
+                        </div>
+                    `;
+                    
+                    const storage = await this.apiClient.getTrailerStorage();
+                    
+                    if (storage && Object.keys(storage).length > 0) {
+                        // Process storage into inventory format
+                        const inventory = {};
+                        
+                        for (const [itemId, itemData] of Object.entries(storage)) {
+                            const baseItemId = itemId.split('|')[0];
+                            inventory[baseItemId] = itemData.amount || 0;
+                        }
+                        
+                        this.state.inventory = inventory;
+                        this.displayInventory();
+                        this.updateStatusMessage('Trailer storage loaded', 'success');
+                        
+                        // Update storage info display
+                        await this.updateStorageInfo();
+                        
+                        // Update API charges display
+                        if (this.apiClient.remainingCharges !== null) {
+                            this.updateApiCharges(this.apiClient.remainingCharges);
+                        }
+
+                        // Show trailer information if available
+                        if (this.apiClient.userDetails.trailer) {
+                            this.elements.trailerType.textContent = this.apiClient.userDetails.trailer;
+                            this.elements.storageSummary.style.display = 'block';
+                        }
+                    // Get trailer capacity
+                    const trailerCapacity = await this.apiClient.getTrailerCapacity();
+                        if (trailerCapacity && trailerCapacity !== this.state.settings.trailerCapacity) {
+                            this.state.settings.trailerCapacity = trailerCapacity;
+                            this.elements.trailerCapacity.value = trailerCapacity;
+                            this.saveSettings();
+                            this.updateStatusMessage(`Trailer: ${this.apiClient.userDetails.trailer}, Capacity: ${trailerCapacity}kg`, 'success');
+                        }
+                        
+                        // Update API charges display
+                        if (this.apiClient.remainingCharges !== null) {
+                            this.updateApiCharges(this.apiClient.remainingCharges);
+                        }
+                    } else {
+                        this.updateStatusMessage('No trailer storage found or no trailer equipped', 'warning');
+                    }
+                } catch (error) {
+                    console.error('Failed to load trailer storage:', error);
+                    this.updateStatusMessage('Error loading trailer storage: ' + error.message, 'error');
+                }
+            }
+            
+            // Update storage info display
+            async updateStorageInfo() {
+                if (!this.apiClient) return;
+                
+                try {
+                    // Show storage summary
+                    this.elements.storageSummary.style.display = 'block';
+                    
+                    // Update trailer info
+                    const trailer = this.apiClient.userDetails.trailer || 'None';
+                    this.elements.trailerType.textContent = trailer;
+                    
+                    // Update capacity info
+                    const capacity = await this.apiClient.getTrailerCapacity();
+                    this.elements.trailerCapacityDisplay.textContent = `${capacity} kg`;
+                    
+                    // Update available storages
+                    const availableStorages = ['Player'];
+                    
+                    // Try to check if trainyard is available
+                    try {
+                        const trainyardStorage = await this.apiClient.getTrainyardStorage();
+                        if (trainyardStorage && Object.keys(trainyardStorage).length > 0) {
+                            availableStorages.push('Trainyard');
+                        }
+                    } catch (e) {
+                        console.log('Trainyard storage not available');
+                    }
+                    
+                    // Check if trailer is available
+                    if (trailer && trailer !== 'None') {
+                        availableStorages.push('Trailer');
+                    }
+                    
+                    this.elements.availableStorages.textContent = availableStorages.join(', ');
+                } catch (error) {
+                    console.error('Failed to update storage info:', error);
+                }
+            }
+            
+            // Load and display item weight information
+            async loadItemWeights() {
+                if (!this.apiClient || !this.state.apiSettings.isConnected) {
+                    console.log('API not connected, using default item weights');
+                    return;
+                }
+                
+                try {
+                    // Get all items from our inventory
+                    const itemIds = Object.keys(this.state.inventory);
+                    
+                    // Don't proceed if no items
+                    if (itemIds.length === 0) {
+                        return;
+                    }
+                    
+                    // Try to get item info for all inventory items
+                    const itemsInfo = await this.apiClient.getItemInfoBatch(itemIds);
+                    
+                    // Update our item data with weights from API
+                    for (const itemId in itemsInfo) {
+                        const apiItemInfo = itemsInfo[itemId];
+                        
+                        // Find this item in our local data
+                        const existingItemIndex = this.state.itemsData.findIndex(item => item.id === itemId);
+                        
+                        if (existingItemIndex >= 0) {
+                            // Update existing item
+                            this.state.itemsData[existingItemIndex].weight = apiItemInfo.data?.weight || this.state.itemsData[existingItemIndex].weight;
+                            this.state.itemsData[existingItemIndex].name = apiItemInfo.data?.label || this.state.itemsData[existingItemIndex].name;
+                        } else {
+                            // Add new item
+                            this.state.itemsData.push({
+                                id: itemId,
+                                name: apiItemInfo.data?.label || itemId,
+                                weight: apiItemInfo.data?.weight || 0,
+                                category: itemId.startsWith('crafted_') ? 'Crafted' : 'Resource'
+                            });
+                        }
+                    }
+                    
+                    console.log(`Updated ${Object.keys(itemsInfo).length} items with API data`);
+                } catch (error) {
+                    console.error('Failed to load item weights:', error);
+                }
+            }
+            
+            // Load all item data from the API
+            async loadAllItemData() {
+                if (!this.apiClient || !this.state.apiSettings.isConnected) {
+                    console.log('API not connected, using default item data');
+                    return;
+                }
+                
+                try {
+                    this.updateStatusMessage('Loading item data from API...');
+                    
+                    // Get all item info from the API
+                    const allItemsInfo = await this.apiClient.getAllItemInfo();
+                    
+                    if (!allItemsInfo || Object.keys(allItemsInfo).length === 0) {
+                        this.updateStatusMessage('No item data found in API', 'warning');
+                        return;
+                    }
+                    
+                    // Process and update our item data
+                    const updatedItemsData = [];
+                    
+                    for (const itemId in allItemsInfo) {
+                        const apiItemInfo = allItemsInfo[itemId];
+                        
+                        if (apiItemInfo && apiItemInfo.data) {
+                            updatedItemsData.push({
+                                id: itemId,
+                                name: apiItemInfo.data.label || itemId,
+                                weight: apiItemInfo.data.weight || 0,
+                                category: itemId.startsWith('crafted_') ? 'Crafted' : 'Resource',
+                                stackable: apiItemInfo.data.stackable || false
+                            });
+                        }
+                    }
+                    
+                    // Replace our item data with the updated one if we have enough items
+                    if (updatedItemsData.length > 20) {
+                        this.state.itemsData = updatedItemsData;
+                        this.updateStatusMessage(`Loaded ${updatedItemsData.length} items from API`, 'success');
+                    } else {
+                        // Merge with existing data to avoid losing items
+                        for (const newItem of updatedItemsData) {
+                            const existingItemIndex = this.state.itemsData.findIndex(item => item.id === newItem.id);
+                            
+                            if (existingItemIndex >= 0) {
+                                this.state.itemsData[existingItemIndex] = newItem;
+                            } else {
+                                this.state.itemsData.push(newItem);
+                            }
+                        }
+                        
+                        this.updateStatusMessage(`Updated item data with ${updatedItemsData.length} items from API`, 'success');
+                    }
+                } catch (error) {
+                    console.error('Failed to load all item data:', error);
+                    this.updateStatusMessage('Error loading item data: ' + error.message, 'warning');
+                }
             }
             
             // Display inventory items
@@ -1387,7 +2319,12 @@
                     // Add category header
                     const categoryDiv = document.createElement('div');
                     categoryDiv.className = 'category-label';
-                    categoryDiv.textContent = category;
+                    categoryDiv.innerHTML = `
+                        <div class="category-header">
+                            <span>${category}</span>
+                            <span class="category-item-count">${items.length} items</span>
+                        </div>
+                    `;
                     inventoryDisplay.appendChild(categoryDiv);
                     
                     // Add items
@@ -1451,7 +2388,7 @@
             }
             
             // Populate recipe select dropdown
-            populateRecipeSelect() {
+            populateRecipeSelect(filteredRecipes = null) {
                 const recipeSelect = this.elements.recipeSelect;
                 recipeSelect.innerHTML = '';
                 
@@ -1461,8 +2398,8 @@
                 defaultOption.text = '-- Select a Recipe --';
                 recipeSelect.appendChild(defaultOption);
                 
-                // Get recipes data
-                const recipesData = this.state.recipesData;
+                // Get recipes data - use filtered if provided
+                const recipesData = filteredRecipes || this.state.recipesData;
                 
                 if (!recipesData || Object.keys(recipesData).length === 0) {
                     this.updateStatusMessage('No recipe data available', 'error');
@@ -1476,6 +2413,9 @@
                     option.text = recipeName;
                     recipeSelect.appendChild(option);
                 });
+                
+                // Update recipe count
+                this.updateStatusMessage(`${Object.keys(recipesData).length} recipes available`, 'info');
             }
             
             // Display recipe details
